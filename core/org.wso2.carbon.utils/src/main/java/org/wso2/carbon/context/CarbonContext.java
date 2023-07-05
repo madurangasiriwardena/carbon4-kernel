@@ -30,10 +30,8 @@ import org.wso2.carbon.context.internal.CarbonContextDataHolder;
 import org.wso2.carbon.context.internal.OSGiDataHolder;
 import org.wso2.carbon.queuing.CarbonQueue;
 import org.wso2.carbon.queuing.CarbonQueueManager;
-import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -170,81 +168,81 @@ public class CarbonContext {
         return getCarbonContextDataHolder().getOrganizationId();
     }
 
-    /**
-     * Method to obtain an instance of a registry on this CarbonContext instance.
-     *
-     * @param type the type of registry required.
-     *
-     * @return the requested registry instance.
-     */
-    public Registry getRegistry(RegistryType type) {
-        int tenantId = AccessController.doPrivileged(new PrivilegedAction<Integer>() {
-            @Override
-            public Integer run() {
-                return getTenantId();
-            }
-        });
-        Registry registry;
-        switch (type) {
-            case USER_CONFIGURATION:
-                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-                    try {
-                        registry = dataHolder.getRegistryService().getConfigUserRegistry(getUsername(), tenantId);
-                        return registry;
-                    } catch (Exception e) {
-                        // If we can't obtain an instance of the registry, we'll simply return null. The
-                        // errors that lead to this situation will be logged by the Registry Kernel.
-                    }
-                    return null;
-                }
-            case SYSTEM_CONFIGURATION:
-                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-                    try {
-                        registry = dataHolder.getRegistryService().getConfigSystemRegistry(tenantId);
-                        return registry;
-                    } catch (Exception e) {
-                        // If we can't obtain an instance of the registry, we'll simply return null. The
-                        // errors that lead to this situation will be logged by the Registry Kernel.
-                    }
-                    return null;
-                }
-            case USER_GOVERNANCE:
-                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-                    try {
-                        registry = dataHolder.getRegistryService().getGovernanceUserRegistry(getUsername(), tenantId);
-                        return registry;
-                    } catch (Exception e) {
-                        // If we can't obtain an instance of the registry, we'll simply return null. The
-                        // errors that lead to this situation will be logged by the Registry Kernel.
-                    }
-                    return null;
-                }
-            case SYSTEM_GOVERNANCE:
-                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-                    try {
-                        registry = dataHolder.getRegistryService().getGovernanceSystemRegistry(tenantId);
-                        return registry;
-                    } catch (Exception e) {
-                        // If we can't obtain an instance of the registry, we'll simply return null. The
-                        // errors that lead to this situation will be logged by the Registry Kernel.
-                    }
-                    return null;
-                }
-            case LOCAL_REPOSITORY:
-                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-                    try {
-                        registry = dataHolder.getRegistryService().getLocalRepository(tenantId);
-                        return registry;
-                    } catch (Exception e) {
-                        // If we can't obtain an instance of the registry, we'll simply return null. The
-                        // errors that lead to this situation will be logged by the Registry Kernel.
-                    }
-                    return null;
-                }
-            default:
-                return null;
-        }
-    }
+//    /**
+//     * Method to obtain an instance of a registry on this CarbonContext instance.
+//     *
+//     * @param type the type of registry required.
+//     *
+//     * @return the requested registry instance.
+//     */
+//    public Registry getRegistry(RegistryType type) {
+//        int tenantId = AccessController.doPrivileged(new PrivilegedAction<Integer>() {
+//            @Override
+//            public Integer run() {
+//                return getTenantId();
+//            }
+//        });
+//        Registry registry;
+//        switch (type) {
+//            case USER_CONFIGURATION:
+//                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+//                    try {
+//                        registry = dataHolder.getRegistryService().getConfigUserRegistry(getUsername(), tenantId);
+//                        return registry;
+//                    } catch (Exception e) {
+//                        // If we can't obtain an instance of the registry, we'll simply return null. The
+//                        // errors that lead to this situation will be logged by the Registry Kernel.
+//                    }
+//                    return null;
+//                }
+//            case SYSTEM_CONFIGURATION:
+//                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+//                    try {
+//                        registry = dataHolder.getRegistryService().getConfigSystemRegistry(tenantId);
+//                        return registry;
+//                    } catch (Exception e) {
+//                        // If we can't obtain an instance of the registry, we'll simply return null. The
+//                        // errors that lead to this situation will be logged by the Registry Kernel.
+//                    }
+//                    return null;
+//                }
+//            case USER_GOVERNANCE:
+//                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+//                    try {
+//                        registry = dataHolder.getRegistryService().getGovernanceUserRegistry(getUsername(), tenantId);
+//                        return registry;
+//                    } catch (Exception e) {
+//                        // If we can't obtain an instance of the registry, we'll simply return null. The
+//                        // errors that lead to this situation will be logged by the Registry Kernel.
+//                    }
+//                    return null;
+//                }
+//            case SYSTEM_GOVERNANCE:
+//                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+//                    try {
+//                        registry = dataHolder.getRegistryService().getGovernanceSystemRegistry(tenantId);
+//                        return registry;
+//                    } catch (Exception e) {
+//                        // If we can't obtain an instance of the registry, we'll simply return null. The
+//                        // errors that lead to this situation will be logged by the Registry Kernel.
+//                    }
+//                    return null;
+//                }
+//            case LOCAL_REPOSITORY:
+//                if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+//                    try {
+//                        registry = dataHolder.getRegistryService().getLocalRepository(tenantId);
+//                        return registry;
+//                    } catch (Exception e) {
+//                        // If we can't obtain an instance of the registry, we'll simply return null. The
+//                        // errors that lead to this situation will be logged by the Registry Kernel.
+//                    }
+//                    return null;
+//                }
+//            default:
+//                return null;
+//        }
+//    }
 
     /**
      * Method to obtain the user realm on this CarbonContext instance.

@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -47,7 +48,6 @@ import org.wso2.carbon.core.commons.stub.loggeduserinfo.ExceptionException;
 import org.wso2.carbon.core.commons.stub.loggeduserinfo.LoggedUserInfo;
 import org.wso2.carbon.core.commons.stub.loggeduserinfo.LoggedUserInfoAdminStub;
 import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
-import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.ui.internal.CarbonUIServiceComponent;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ServerConstants;
@@ -409,7 +409,8 @@ public abstract class AbstractCarbonUIAuthenticator implements CarbonUIAuthentic
             // For local transport - the cookie will be null.
             // This generated cookie cannot be used for any form authentication with the backend.
             // This is done to be backward compatible.
-            cookie = UUIDGenerator.generateUUID();
+//            cookie = UUIDGenerator.generateUUID();
+            cookie = UUID.randomUUID().toString();
         }
 
         if (rememberMeCookie != null) {

@@ -22,13 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.equinox.http.helper.BundleEntryHttpContext;
 import org.osgi.framework.Bundle;
-import org.wso2.carbon.registry.core.Registry;
 
 public class SecuredComponentEntryHttpContext extends BundleEntryHttpContext {
 
 	private String bundlePath;
 
-	protected Registry registry;
+//	protected Registry registry;
 
     protected UIResourceRegistry uiResourceRegistry;
 
@@ -44,9 +43,8 @@ public class SecuredComponentEntryHttpContext extends BundleEntryHttpContext {
         this.uiResourceRegistry = uiResourceRegistry;
     }
 
-	public SecuredComponentEntryHttpContext(Bundle bundle, String s, Registry registry) {
+	public SecuredComponentEntryHttpContext(Bundle bundle, String s) {
 		super(bundle, s);
-		this.registry = registry;
     }
 
     public URL getResource(String resourceName) {

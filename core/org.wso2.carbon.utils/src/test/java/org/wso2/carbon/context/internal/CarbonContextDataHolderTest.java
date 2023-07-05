@@ -27,7 +27,6 @@ import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.queuing.CarbonQueue;
 import org.wso2.carbon.queuing.CarbonQueueManager;
-import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserRealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantCarbonQueueManager;
@@ -61,20 +60,20 @@ public class CarbonContextDataHolderTest extends BaseTest {
         Assert.assertEquals(carbonContextDataHolder1, carbonContextDataHolder2);
     }
 
-    @Test
-    public void testRegistry() throws Exception {
-        CarbonContextDataHolder carbonContextDataHolder = CarbonContextDataHolder.getThreadLocalCarbonContextHolder();
-        Registry registry = Mockito.mock(Registry.class);
-        carbonContextDataHolder.setConfigSystemRegistry(registry);
-        carbonContextDataHolder.setConfigUserRegistry(registry);
-        carbonContextDataHolder.setGovernanceSystemRegistry(registry);
-        carbonContextDataHolder.setGovernanceUserRegistry(registry);
-
-        Assert.assertEquals(carbonContextDataHolder.getConfigSystemRegistry(), registry);
-        Assert.assertEquals(carbonContextDataHolder.getConfigUserRegistry(), registry);
-        Assert.assertEquals(carbonContextDataHolder.getGovernanceSystemRegistry(), registry);
-        Assert.assertEquals(carbonContextDataHolder.getGovernanceUserRegistry(), registry);
-    }
+//    @Test
+//    public void testRegistry() throws Exception {
+//        CarbonContextDataHolder carbonContextDataHolder = CarbonContextDataHolder.getThreadLocalCarbonContextHolder();
+//        Registry registry = Mockito.mock(Registry.class);
+//        carbonContextDataHolder.setConfigSystemRegistry(registry);
+//        carbonContextDataHolder.setConfigUserRegistry(registry);
+//        carbonContextDataHolder.setGovernanceSystemRegistry(registry);
+//        carbonContextDataHolder.setGovernanceUserRegistry(registry);
+//
+//        Assert.assertEquals(carbonContextDataHolder.getConfigSystemRegistry(), registry);
+//        Assert.assertEquals(carbonContextDataHolder.getConfigUserRegistry(), registry);
+//        Assert.assertEquals(carbonContextDataHolder.getGovernanceSystemRegistry(), registry);
+//        Assert.assertEquals(carbonContextDataHolder.getGovernanceUserRegistry(), registry);
+//    }
 
     @Test
     public void testUserRealm() throws Exception {

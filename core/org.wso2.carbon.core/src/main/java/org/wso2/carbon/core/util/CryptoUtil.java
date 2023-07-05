@@ -26,7 +26,6 @@ import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.core.internal.CarbonCoreDataHolder;
 import org.wso2.carbon.crypto.api.CipherMetaDataHolder;
 import org.wso2.carbon.crypto.api.CryptoService;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.utils.ServerConstants;
 
 import java.nio.charset.Charset;
@@ -44,7 +43,7 @@ public class CryptoUtil {
     private static final String CIPHER_TRANSFORMATION_SYSTEM_PROPERTY = "org.wso2.CipherTransformation";
     private static Log log = LogFactory.getLog(CryptoUtil.class);
     private ServerConfigurationService serverConfigService;
-    private RegistryService registryService;
+//    private RegistryService registryService;
     private Gson gson = new Gson();
     private static CryptoUtil instance = null;
     private static final char[] HEX_CHARACTERS = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
@@ -61,18 +60,18 @@ public class CryptoUtil {
      */
     public static CryptoUtil getDefaultCryptoUtil() {
         return getDefaultCryptoUtil(CarbonCoreDataHolder.getInstance().
-                getServerConfigurationService(), lookupRegistryService());
+                getServerConfigurationService());
     }
 
-    public static RegistryService lookupRegistryService() {
-        try {
-            return CarbonCoreDataHolder.getInstance().getRegistryService();
-        } catch (Exception e) {
-            log.error("Error in getting RegistryService from CarbonCoreDataHolder: " +
-                    e.getMessage(), e);
-            return null;
-        }
-    }
+//    public static RegistryService lookupRegistryService() {
+//        try {
+//            return CarbonCoreDataHolder.getInstance().getRegistryService();
+//        } catch (Exception e) {
+//            log.error("Error in getting RegistryService from CarbonCoreDataHolder: " +
+//                    e.getMessage(), e);
+//            return null;
+//        }
+//    }
 
     /**
      * This method is used to get the CryptoUtil object given the ServerConfigurationService
@@ -81,31 +80,28 @@ public class CryptoUtil {
      * The same is also for RegistryService.
      *
      * @param serverConfigService The ServerConfigurationService object
-     * @param registryService     The RegistryService object
      * @return The created or cached CryptoUtil instance
      */
     public synchronized static CryptoUtil getDefaultCryptoUtil(
-            ServerConfigurationService serverConfigService,
-            RegistryService registryService) {
+            ServerConfigurationService serverConfigService) {
         if (instance == null) {
-            instance = new CryptoUtil(serverConfigService, registryService);
+            instance = new CryptoUtil(serverConfigService);
         }
         return instance;
     }
 
-    private CryptoUtil(ServerConfigurationService serverConfigService,
-                       RegistryService registryService) {
+    private CryptoUtil(ServerConfigurationService serverConfigService) {
         this.serverConfigService = serverConfigService;
-        this.registryService = registryService;
+//        this.registryService = registryService;
     }
 
     public ServerConfigurationService getServerConfigService() {
         return serverConfigService;
     }
 
-    public RegistryService getRegistryService() {
-        return registryService;
-    }
+//    public RegistryService getRegistryService() {
+//        return registryService;
+//    }
 
     /**
      * Encrypt a given plain text

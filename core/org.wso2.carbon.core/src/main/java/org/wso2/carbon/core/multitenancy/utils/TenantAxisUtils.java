@@ -53,9 +53,7 @@ import org.wso2.carbon.core.multitenancy.TenantAxisConfigurator;
 import org.wso2.carbon.core.multitenancy.transports.DummyTransportListener;
 import org.wso2.carbon.core.multitenancy.transports.TenantTransportInDescription;
 import org.wso2.carbon.core.multitenancy.transports.TenantTransportSender;
-import org.wso2.carbon.core.transports.TransportPersistenceManager;
 import org.wso2.carbon.core.util.Utils;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
@@ -306,16 +304,15 @@ public final class TenantAxisUtils {
 
             AxisConfiguration mainAxisConfig = mainConfigCtx.getAxisConfiguration();
 
-            dataHolder.getTenantRegistryLoader().loadTenantRegistry(tenantId);
+//            dataHolder.getTenantRegistryLoader().loadTenantRegistry(tenantId);
 
             try {
-                UserRegistry tenantConfigRegistry =
-                        dataHolder.getRegistryService().getConfigSystemRegistry(tenantId);
-                UserRegistry tenantLocalUserRegistry =
-                        dataHolder.getRegistryService().getLocalRepository(tenantId);
+//                UserRegistry tenantConfigRegistry =
+//                        dataHolder.getRegistryService().getConfigSystemRegistry(tenantId);
+//                UserRegistry tenantLocalUserRegistry =
+//                        dataHolder.getRegistryService().getLocalRepository(tenantId);
                 TenantAxisConfigurator tenantAxisConfigurator =
-                        new TenantAxisConfigurator(mainAxisConfig, tenantDomain, tenantId,
-                                                   tenantConfigRegistry, tenantLocalUserRegistry);
+                        new TenantAxisConfigurator(mainAxisConfig, tenantDomain, tenantId);
                 doPreConfigContextCreation(tenantId);
                 tenantConfigCtx =
                         ConfigurationContextFactory.createConfigurationContext(tenantAxisConfigurator);

@@ -32,9 +32,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.Resources;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.*;
@@ -359,38 +356,38 @@ public final class PersistenceUtils {
         return policyElement;
     }
 
-    /**
-     * Creates a registry Resource for a given Policy
-     *
-     * @param configRegistry config registry
-     * @param policy         - Policy instance
-     * @param policyId       - policy uuid
-     * @param policyType     - policy type
-     * @return - created policy resource
-     * @throws Exception - error on serialization
-     */
-    public static Resource createPolicyResource(Registry configRegistry,
-                                                Policy policy, String policyId, String policyType)
-            throws RegistryException {
-        try {
-            Resource policyResource = configRegistry.newResource();
-            policyResource.setProperty(RegistryResources.ServiceProperties.POLICY_UUID, policyId);
-
-            // Set the policy as a string in the resource
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream);
-            policy.serialize(writer);
-            writer.flush();
-            policyResource.setContent(outputStream.toString());
-
-            policyResource.setProperty(RegistryResources.ServiceProperties.POLICY_TYPE, policyType);
-            policyResource.setMediaType("application/policy+xml");
-            return policyResource;
-        } catch (XMLStreamException e) {
-            log.error("Error creating the registry resource for " + policyId, e);
-            throw new RegistryException("Error creating the registry resource for " + policyId, e);
-        }
-    }
+//    /**
+//     * Creates a registry Resource for a given Policy
+//     *
+//     * @param configRegistry config registry
+//     * @param policy         - Policy instance
+//     * @param policyId       - policy uuid
+//     * @param policyType     - policy type
+//     * @return - created policy resource
+//     * @throws Exception - error on serialization
+//     */
+//    public static Resource createPolicyResource(Registry configRegistry,
+//                                                Policy policy, String policyId, String policyType)
+//            throws RegistryException {
+//        try {
+//            Resource policyResource = configRegistry.newResource();
+//            policyResource.setProperty(RegistryResources.ServiceProperties.POLICY_UUID, policyId);
+//
+//            // Set the policy as a string in the resource
+//            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//            XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream);
+//            policy.serialize(writer);
+//            writer.flush();
+//            policyResource.setContent(outputStream.toString());
+//
+//            policyResource.setProperty(RegistryResources.ServiceProperties.POLICY_TYPE, policyType);
+//            policyResource.setMediaType("application/policy+xml");
+//            return policyResource;
+//        } catch (XMLStreamException e) {
+//            log.error("Error creating the registry resource for " + policyId, e);
+//            throw new RegistryException("Error creating the registry resource for " + policyId, e);
+//        }
+//    }
 
     /**
      * Returns the policyUUID (Resources.POLICY_UUID) from the given policyWrapperElement OMElement

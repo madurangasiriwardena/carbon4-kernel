@@ -72,20 +72,27 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>javax.cache.wso2</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.geronimo.specs</groupId>
-                    <artifactId>geronimo-stax-api_1.0_spec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        <!--        TODO check the permission tree/keystore service and remove the registry usage-->
+<!--        <dependency>-->
+<!--            <groupId>org.wso2.carbon</groupId>-->
+<!--            <artifactId>org.wso2.carbon.registry.core</artifactId>-->
+<!--            <version>4.9.5-SNAPSHOT</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.apache.geronimo.specs</groupId>-->
+<!--                    <artifactId>geronimo-stax-api_1.0_spec</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>commons-logging</groupId>-->
+<!--                    <artifactId>commons-logging</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.wso2.carbon</groupId>-->
+<!--            <artifactId>org.wso2.carbon.registry.core</artifactId>-->
+<!--            <version>4.9.5-SNAPSHOT</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
@@ -202,6 +209,10 @@
             <scope>test</scope>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.schema.wso2</groupId>
+            <artifactId>XmlSchema</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -245,7 +256,6 @@
                             javax.servlet; version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.http; version="${imp.pkg.version.javax.servlet}",
                             javax.xml.stream.*; version=1.0.1,
-                            org.wso2.carbon.registry.core.service,
                             org.wso2.carbon.user.core.*; version=0.0.0,
                             org.bouncycastle.*; version="${imp.pkg.version.bcp}",
                             *;resolution:=optional

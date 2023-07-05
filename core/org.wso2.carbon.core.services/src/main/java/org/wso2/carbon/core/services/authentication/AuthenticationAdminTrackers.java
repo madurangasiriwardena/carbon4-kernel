@@ -23,7 +23,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 
@@ -34,7 +33,7 @@ public class AuthenticationAdminTrackers {
     private static BundleContext bundleContext  = null;
     private static ServiceTracker dlgtRealmTracker = null;
     private static ServiceTracker defRealmTracker = null;
-    private static ServiceTracker registryTracker = null;
+//    private static ServiceTracker registryTracker = null;
 
     public static void init(BundleContext bc){
         bundleContext = bc;
@@ -49,14 +48,14 @@ public class AuthenticationAdminTrackers {
                 dlgtRealmTracker.open();
             }
 
-            ServiceReference[] regServiceRef = bundleContext.getServiceReferences(RegistryService.class.getName(), null);
-            if (regServiceRef != null && regServiceRef.length > 0) {
-                registryTracker = new ServiceTracker(bundleContext, regServiceRef[0], null);
-                registryTracker.open();
-            } else {
-                String msg = "Registry service is not registered.";
-                log.error(msg);
-            }
+//            ServiceReference[] regServiceRef = bundleContext.getServiceReferences(RegistryService.class.getName(), null);
+//            if (regServiceRef != null && regServiceRef.length > 0) {
+//                registryTracker = new ServiceTracker(bundleContext, regServiceRef[0], null);
+//                registryTracker.open();
+//            } else {
+//                String msg = "Registry service is not registered.";
+//                log.error(msg);
+//            }
             
         } catch (InvalidSyntaxException e) {
 
@@ -84,16 +83,16 @@ public class AuthenticationAdminTrackers {
         return realmService;     
     }
 
-    public RegistryService getRegistryService() throws Exception {
-
-        if (registryTracker != null) {
-            return (RegistryService) registryTracker.getService();
-        } else {
-            String msg = "Failed to get the registry service. Registry OSGi service is not initialized. " +
-                    "User's registry will not be availale.";
-            log.error(msg);
-            throw new Exception(msg);
-        }
-
-    }
+//    public RegistryService getRegistryService() throws Exception {
+//
+//        if (registryTracker != null) {
+//            return (RegistryService) registryTracker.getService();
+//        } else {
+//            String msg = "Failed to get the registry service. Registry OSGi service is not initialized. " +
+//                    "User's registry will not be availale.";
+//            log.error(msg);
+//            throw new Exception(msg);
+//        }
+//
+//    }
 }

@@ -304,13 +304,13 @@ public class CarbonUtilsTest extends BaseTest {
         System.clearProperty("instances.value");
     }
 
-    @Test(groups = {"org.wso2.carbon.utils.base"}, dependsOnMethods = "testIsMasterOrChildNode")
-    public void testUseRegistryBasedRepository() throws Exception {
-        Assert.assertFalse(CarbonUtils.useRegistryBasedRepository());
-        System.setProperty("carbon.use.registry.repo", "true");
-        Assert.assertTrue(CarbonUtils.useRegistryBasedRepository());
-        System.clearProperty("carbon.use.registry.repo");
-    }
+//    @Test(groups = {"org.wso2.carbon.utils.base"}, dependsOnMethods = "testIsMasterOrChildNode")
+//    public void testUseRegistryBasedRepository() throws Exception {
+//        Assert.assertFalse(CarbonUtils.useRegistryBasedRepository());
+//        System.setProperty("carbon.use.registry.repo", "true");
+//        Assert.assertTrue(CarbonUtils.useRegistryBasedRepository());
+//        System.clearProperty("carbon.use.registry.repo");
+//    }
 
     @Test(groups = {"org.wso2.carbon.utils.base"})
     public void testGetServerURL() throws Exception {

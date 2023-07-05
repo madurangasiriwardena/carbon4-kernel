@@ -21,14 +21,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
- * This is the class should be used by Admin service authors to get the Registry
- * and Realms.
+ * This is the class should be used by Admin service authors to get the Realms.
  */
 public class AdminServicesUtil {
 
@@ -36,22 +33,6 @@ public class AdminServicesUtil {
 
     public static boolean isSuperTenant() throws CarbonException {
         return CarbonContext.getThreadLocalCarbonContext().getTenantId() == MultitenantConstants.SUPER_TENANT_ID;
-    }
-
-    /**
-     * @deprecated
-     */
-    public static UserRegistry getSystemRegistry() throws CarbonException {
-        return (UserRegistry) CarbonContext.getThreadLocalCarbonContext().getRegistry(
-                RegistryType.SYSTEM_CONFIGURATION);
-    }
-
-    /**
-     * @deprecated
-     */
-    public static UserRegistry getUserRegistry() throws CarbonException {
-        return (UserRegistry) CarbonContext.getThreadLocalCarbonContext().getRegistry(
-                RegistryType.USER_CONFIGURATION);
     }
 
     public static UserRealm getUserRealm() throws CarbonException {

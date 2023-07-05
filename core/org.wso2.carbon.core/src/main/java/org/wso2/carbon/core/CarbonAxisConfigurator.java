@@ -28,8 +28,6 @@ import org.apache.axis2.deployment.RepositoryListener;
 import org.apache.axis2.deployment.util.Utils;
 import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.TransportInDescription;
-import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisConfigurator;
 import org.apache.axis2.i18n.Messages;
@@ -39,12 +37,9 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.core.deployment.CarbonDeploymentSchedulerTask;
 import org.wso2.carbon.core.internal.CarbonCoreDataHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.transports.TransportPersistenceManager;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.utils.Axis2ConfigItemHolder;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ServerException;
@@ -320,14 +315,6 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
             PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            RegistryService rs = CarbonCoreDataHolder.getInstance().getRegistryService();
-            carbonContext.setRegistry(RegistryType.SYSTEM_CONFIGURATION,
-                    rs.getConfigSystemRegistry());
-            carbonContext.setRegistry(RegistryType.SYSTEM_GOVERNANCE,
-                    rs.getGovernanceSystemRegistry());
-            carbonContext.setRegistry(RegistryType.LOCAL_REPOSITORY,
-                    rs.getLocalRepository());
-            carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 
         } catch (Exception e) {
             String msg = "Error occurred while populating the CarbonContext on the " +
@@ -377,7 +364,8 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
 
         try {
             // Load transports from the registry
-            loadTransports();
+            //TODO no transport is enabled by default in IS. Hence trying to get rid of this usage.
+//            loadTransports();
         } catch (Exception e) {
             log.warn("Unable to load transports from the registry. Some transports may not " +
                     "get initialized.", e);
@@ -387,66 +375,66 @@ public class CarbonAxisConfigurator extends DeploymentEngine implements AxisConf
         return axisConfig;
     }
 
-    private void loadTransports() throws Exception {
-
-        List<TransportInDescription> transportIns = new ArrayList<TransportInDescription>();
-        List<TransportOutDescription> transportOuts = new ArrayList<TransportOutDescription>();
-
-        // process transport senders
-        TransportPersistenceManager transportPM = new TransportPersistenceManager(axisConfig);
-        String[] transports = transportPM.getEnabledTransports(false);
-        if (transports != null) {
-            for (String transportToInit : transports) {
-                if (axisConfig.getTransportOut(transportToInit.trim()) == null) {
-                    TransportOutDescription transportOutDesc =
-                            transportPM.getTransportSender(transportToInit, true);
-                    if (transportOutDesc != null) {
-                        transportOuts.add(transportOutDesc);
-                        // No need to init the sender
-                        // ConfigurationContextFactory should take care of that
-                    }
-                }
-            }
-        }
-
-        // process transport receivers
-        transports = transportPM.getEnabledTransports(true);
-        if (transports != null) {
-            for (String transportToInit : transports) {
-                if (axisConfig.getTransportIn(transportToInit.trim()) == null) {
-                    TransportInDescription transportInDesc =
-                            transportPM.getTransportListener(transportToInit, true);
-                    if (transportInDesc != null) {
-                        transportIns.add(transportInDesc);
-                        // No need to init the listener
-                        // ListenerManager should take care of that
-                    }
-                }
-            }
-        }
-
-        // Now add the descriptions to the axis configuration
-        // This ensures that either all the transports in the registry are initialized or none at all
-        for (TransportOutDescription trpOut : transportOuts) {
-            axisConfig.addTransportOut(trpOut);
-            if (log.isDebugEnabled()) {
-                log.debug(trpOut.getName() + " transport sender added to the configuration");
-            }
-        }
-
-        for (TransportInDescription trpIn : transportIns) {
-            axisConfig.addTransportIn(trpIn);
-            if (log.isDebugEnabled()) {
-                log.debug(trpIn.getName() + " transport receiver added to the configuration");
-            }
-        }
-
-        // Save the transport configurations to the registry.
-        // We do this here to ensure that necessary transport resources are in the registry
-        // before services start getting deployed.
-        transportPM.updateEnabledTransports(axisConfig.getTransportsIn().values(),
-                                            axisConfig.getTransportsOut().values());
-    }
+//    private void loadTransports() throws Exception {
+//
+//        List<TransportInDescription> transportIns = new ArrayList<TransportInDescription>();
+//        List<TransportOutDescription> transportOuts = new ArrayList<TransportOutDescription>();
+//
+//        // process transport senders
+//        TransportPersistenceManager transportPM = new TransportPersistenceManager(axisConfig);
+//        String[] transports = transportPM.getEnabledTransports(false);
+//        if (transports != null) {
+//            for (String transportToInit : transports) {
+//                if (axisConfig.getTransportOut(transportToInit.trim()) == null) {
+//                    TransportOutDescription transportOutDesc =
+//                            transportPM.getTransportSender(transportToInit, true);
+//                    if (transportOutDesc != null) {
+//                        transportOuts.add(transportOutDesc);
+//                        // No need to init the sender
+//                        // ConfigurationContextFactory should take care of that
+//                    }
+//                }
+//            }
+//        }
+//
+//        // process transport receivers
+//        transports = transportPM.getEnabledTransports(true);
+//        if (transports != null) {
+//            for (String transportToInit : transports) {
+//                if (axisConfig.getTransportIn(transportToInit.trim()) == null) {
+//                    TransportInDescription transportInDesc =
+//                            transportPM.getTransportListener(transportToInit, true);
+//                    if (transportInDesc != null) {
+//                        transportIns.add(transportInDesc);
+//                        // No need to init the listener
+//                        // ListenerManager should take care of that
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Now add the descriptions to the axis configuration
+//        // This ensures that either all the transports in the registry are initialized or none at all
+//        for (TransportOutDescription trpOut : transportOuts) {
+//            axisConfig.addTransportOut(trpOut);
+//            if (log.isDebugEnabled()) {
+//                log.debug(trpOut.getName() + " transport sender added to the configuration");
+//            }
+//        }
+//
+//        for (TransportInDescription trpIn : transportIns) {
+//            axisConfig.addTransportIn(trpIn);
+//            if (log.isDebugEnabled()) {
+//                log.debug(trpIn.getName() + " transport receiver added to the configuration");
+//            }
+//        }
+//
+//        // Save the transport configurations to the registry.
+//        // We do this here to ensure that necessary transport resources are in the registry
+//        // before services start getting deployed.
+//        transportPM.updateEnabledTransports(axisConfig.getTransportsIn().values(),
+//                                            axisConfig.getTransportsOut().values());
+//    }
 
     public synchronized void runDeployment(){
         schedulerTask.runAxisDeployment();

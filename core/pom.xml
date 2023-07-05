@@ -110,16 +110,16 @@
         <module>javax.cache</module>
         <module>org.wso2.carbon.tomcat</module>
         <module>org.wso2.carbon.tomcat.ext</module>
-        <module>org.wso2.carbon.registry.api</module>
+<!--        <module>org.wso2.carbon.registry.api</module>-->
         <module>org.wso2.carbon.user.api</module>
         <module>org.wso2.carbon.osgi.security</module>
-        <module>org.wso2.carbon.registry.xboot</module>
+<!--        <module>org.wso2.carbon.registry.xboot</module>-->
         <module>org.wso2.carbon.queuing</module>
         <module>org.wso2.carbon.utils</module>
         <module>org.wso2.carbon.securevault</module>
-        <module>org.wso2.carbon.registry.core</module>
-        <module>org.wso2.carbon.registry.server</module>
-        <module>org.wso2.carbon.application.deployer</module>
+<!--        <module>org.wso2.carbon.registry.core</module>-->
+<!--        <module>org.wso2.carbon.registry.server</module>-->
+<!--        <module>org.wso2.carbon.application.deployer</module>-->
         <module>org.wso2.carbon.core</module>
         <module>org.wso2.carbon.bridge</module>
         <module>org.wso2.carbon.http.bridge</module>
@@ -141,7 +141,7 @@
         <module>org.wso2.carbon.bootstrap</module>
         <module>org.wso2.carbon.core.bootup.validator</module>
         <module>feature-manager</module>
-        <module>server-role-manager</module>
+<!--        <module>server-role-manager</module>-->
         <module>org.wso2.carbon.coordination.common</module>
         <module>org.wso2.carbon.coordination.core</module>
         <module>org.wso2.carbon.ndatasource.common</module>
@@ -149,6 +149,6 @@
         <module>org.wso2.carbon.ndatasource.rdbms</module>
         <module>org.wso2.carbon.framework.exporter</module>
         <module>org.wso2.carbon.pax-logging-log4j2-plugins</module>
-        <module>admin-advisory-mgt</module>
+<!--        <module>admin-advisory-mgt</module>-->
     </modules>
 </project>

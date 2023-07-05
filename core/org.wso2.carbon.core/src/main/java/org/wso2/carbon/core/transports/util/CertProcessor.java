@@ -30,10 +30,6 @@ import org.wso2.carbon.core.transports.CarbonHttpResponse;
 import org.wso2.carbon.core.transports.HttpGetRequestProcessor;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.KeyStoreUtil;
-import org.wso2.carbon.registry.core.Association;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.service.RegistryService;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -53,84 +49,85 @@ public class CertProcessor implements HttpGetRequestProcessor {
         //TODO: Method implementation
     }
 
+    // TODO check the usage of this method
     public void process(CarbonHttpRequest request,
                         CarbonHttpResponse response,
                         ConfigurationContext configurationContext) throws Exception {
-        String requestURI = request.getRequestURI();
-        String contextPath = configurationContext.getServiceContextPath();
-        String serviceName =
-                requestURI.substring(requestURI.indexOf(contextPath) + contextPath.length() + 1);
-        
-        AxisService axisService =
-                configurationContext.getAxisConfiguration().getServiceForActivation(serviceName);
-        OutputStream outputStream = response.getOutputStream();
-        
-        if (!axisService.isActive()) {
-            response.addHeader(HTTP.CONTENT_TYPE, "text/html");
-            outputStream.write(("<h4>Service " + serviceName +
-                                " is inactive. Cannot retrieve certificate.</h4>").getBytes());
-            outputStream.flush();
-        } else {
-
-            RegistryService registryService = dataHolder.getRegistryService();
-            Registry registry = registryService.getConfigSystemRegistry();
-
-            String servicePath = RegistryResources.SERVICE_GROUPS
-            + axisService.getAxisServiceGroup().getServiceGroupName()
-            + RegistryResources.SERVICES + axisService.getName();
-
-            Resource serviceResource = registry.get(servicePath);
-            Association[] assoc = registry.getAssociations(servicePath, RegistryResources.Associations.PRIVATE_KEYSTORE);
-            
-            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(
-                    MultitenantConstants.SUPER_TENANT_ID);
-            
-            KeyStore keyStore = null;
-            if(assoc.length < 1){
-
-                boolean httpsEnabled = false;
-                Association[] associations =
-                    registry.getAssociations(servicePath, RegistryResources.Associations.EXPOSED_TRANSPORTS);
-                for (Association association : associations) {
-                    Resource resource = registry.get(association.getDestinationPath());
-                    String transportProtocol = resource.getProperty(RegistryResources.Transports.PROTOCOL_NAME);
-                    if(transportProtocol.equals("https")){
-                        httpsEnabled = true;
-                        break;
-                    }
-                    resource.discard();
-                }
-                
-                if (httpsEnabled ||Boolean.valueOf(serviceResource.getProperty(RegistryResources.ServiceProperties.EXPOSED_ON_ALL_TANSPORTS))) {
-                    keyStore = keyStoreManager.getPrimaryKeyStore();
-                } 
-            } else {
-                KeyStore ks = null;
-                String kspath = assoc[0].getDestinationPath();
-                if(kspath.equals(RegistryResources.SecurityManagement.PRIMARY_KEYSTORE_PHANTOM_RESOURCE)){
-                    keyStore = keyStoreManager.getPrimaryKeyStore();
-                }else{
-                    String keyStoreName = kspath.substring(kspath.lastIndexOf('/')+1);
-                    keyStore = keyStoreManager.getKeyStore(keyStoreName);
-                }
-            }
-            serviceResource.discard();
-
-            String alias = null;
-            if(keyStore != null){
-                alias = KeyStoreUtil.getPrivateKeyAlias(keyStore);
-            }
-            
-            if(alias != null){
-                Certificate cert = KeyStoreUtil.getCertificate(alias, keyStore);
-                serializeCert(cert, response, outputStream, serviceName);
-            }else {
-                response.addHeader(HTTP.CONTENT_TYPE, "text/html");
-                outputStream.write(("<h4>Service " + serviceName +
-                                    " does not have a private key.</h4>").getBytes());
-                outputStream.flush();
-            }
-        }
+//        String requestURI = request.getRequestURI();
+//        String contextPath = configurationContext.getServiceContextPath();
+//        String serviceName =
+//                requestURI.substring(requestURI.indexOf(contextPath) + contextPath.length() + 1);
+//
+//        AxisService axisService =
+//                configurationContext.getAxisConfiguration().getServiceForActivation(serviceName);
+//        OutputStream outputStream = response.getOutputStream();
+//
+//        if (!axisService.isActive()) {
+//            response.addHeader(HTTP.CONTENT_TYPE, "text/html");
+//            outputStream.write(("<h4>Service " + serviceName +
+//                                " is inactive. Cannot retrieve certificate.</h4>").getBytes());
+//            outputStream.flush();
+//        } else {
+//
+//            RegistryService registryService = dataHolder.getRegistryService();
+//            Registry registry = registryService.getConfigSystemRegistry();
+//
+//            String servicePath = RegistryResources.SERVICE_GROUPS
+//            + axisService.getAxisServiceGroup().getServiceGroupName()
+//            + RegistryResources.SERVICES + axisService.getName();
+//
+//            Resource serviceResource = registry.get(servicePath);
+//            Association[] assoc = registry.getAssociations(servicePath, RegistryResources.Associations.PRIVATE_KEYSTORE);
+//
+//            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(
+//                    MultitenantConstants.SUPER_TENANT_ID);
+//
+//            KeyStore keyStore = null;
+//            if(assoc.length < 1){
+//
+//                boolean httpsEnabled = false;
+//                Association[] associations =
+//                    registry.getAssociations(servicePath, RegistryResources.Associations.EXPOSED_TRANSPORTS);
+//                for (Association association : associations) {
+//                    Resource resource = registry.get(association.getDestinationPath());
+//                    String transportProtocol = resource.getProperty(RegistryResources.Transports.PROTOCOL_NAME);
+//                    if(transportProtocol.equals("https")){
+//                        httpsEnabled = true;
+//                        break;
+//                    }
+//                    resource.discard();
+//                }
+//
+//                if (httpsEnabled ||Boolean.valueOf(serviceResource.getProperty(RegistryResources.ServiceProperties.EXPOSED_ON_ALL_TANSPORTS))) {
+//                    keyStore = keyStoreManager.getPrimaryKeyStore();
+//                }
+//            } else {
+//                KeyStore ks = null;
+//                String kspath = assoc[0].getDestinationPath();
+//                if(kspath.equals(RegistryResources.SecurityManagement.PRIMARY_KEYSTORE_PHANTOM_RESOURCE)){
+//                    keyStore = keyStoreManager.getPrimaryKeyStore();
+//                }else{
+//                    String keyStoreName = kspath.substring(kspath.lastIndexOf('/')+1);
+//                    keyStore = keyStoreManager.getKeyStore(keyStoreName);
+//                }
+//            }
+//            serviceResource.discard();
+//
+//            String alias = null;
+//            if(keyStore != null){
+//                alias = KeyStoreUtil.getPrivateKeyAlias(keyStore);
+//            }
+//
+//            if(alias != null){
+//                Certificate cert = KeyStoreUtil.getCertificate(alias, keyStore);
+//                serializeCert(cert, response, outputStream, serviceName);
+//            }else {
+//                response.addHeader(HTTP.CONTENT_TYPE, "text/html");
+//                outputStream.write(("<h4>Service " + serviceName +
+//                                    " does not have a private key.</h4>").getBytes());
+//                outputStream.flush();
+//            }
+//        }
     }
 
     /**

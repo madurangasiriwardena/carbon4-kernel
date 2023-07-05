@@ -37,8 +37,6 @@ import org.wso2.carbon.core.init.CarbonServerManager;
 import org.wso2.carbon.crypto.api.CryptoService;
 import org.wso2.carbon.crypto.api.ExternalCryptoProvider;
 import org.wso2.carbon.crypto.api.InternalCryptoProvider;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.core.clustering.api.CoordinatedActivity;
 import org.wso2.carbon.core.encryption.SymmetricEncryption;
@@ -141,25 +139,25 @@ public class CarbonCoreServiceComponent {
         dataHolder.setHttpService(null);
     }
 
-    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, 
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-        dataHolder.setRegistryService(registryService);
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-        dataHolder.setRegistryService(null);
-    }
-
-    @Reference(name = "tenant.registry.loader", cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC, unbind = "unSetTenantRegistryLoader")
-    protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
-        dataHolder.setTenantRegistryLoader(tenantRegistryLoader);
-    }
-
-    protected void unSetTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
-        dataHolder.setTenantRegistryLoader(null);
-    }
+//    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRegistryService")
+//    protected void setRegistryService(RegistryService registryService) {
+//        dataHolder.setRegistryService(registryService);
+//    }
+//
+//    protected void unsetRegistryService(RegistryService registryService) {
+//        dataHolder.setRegistryService(null);
+//    }
+//
+//    @Reference(name = "tenant.registry.loader", cardinality = ReferenceCardinality.MANDATORY,
+//            policy = ReferencePolicy.DYNAMIC, unbind = "unSetTenantRegistryLoader")
+//    protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
+//        dataHolder.setTenantRegistryLoader(tenantRegistryLoader);
+//    }
+//
+//    protected void unSetTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
+//        dataHolder.setTenantRegistryLoader(null);
+//    }
 
     @Reference(name = "carbonCryptoService", cardinality = ReferenceCardinality.OPTIONAL, 
             policy = ReferencePolicy.DYNAMIC, unbind = "unsetCarbonCryptoService")

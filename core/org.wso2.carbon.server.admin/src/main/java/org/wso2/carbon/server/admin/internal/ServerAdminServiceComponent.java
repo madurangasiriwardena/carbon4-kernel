@@ -35,9 +35,6 @@ import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.core.services.authentication.BasicAccessAuthenticator;
 import org.wso2.carbon.core.services.authentication.CookieAuthenticator;
 import org.wso2.carbon.core.services.authentication.ServerAuthenticator;
-import org.wso2.carbon.registry.core.dataaccess.DataAccessManager;
-import org.wso2.carbon.registry.core.jdbc.dataaccess.JDBCDataAccessManager;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.server.admin.auth.AuthenticatorServerRegistry;
 import org.wso2.carbon.server.admin.common.IServerAdmin;
 import org.wso2.carbon.server.admin.service.ServerAdmin;
@@ -70,7 +67,7 @@ public class ServerAdminServiceComponent {
             configContext.getAxisConfiguration().engageModule(SERVER_ADMIN_MODULE_NAME);
 
             //setUserManagerDriver(userRealmDefault);
-            setRegistryDriver(dataHolder.getRegistryService());
+//            setRegistryDriver(dataHolder.getRegistryService());
             
 
             // Registering new Authenticator. This change should be backward compatible as
@@ -122,45 +119,45 @@ public class ServerAdminServiceComponent {
             registeredMBeans = true;        
     }
 
-    private void setRegistryDriver(RegistryService registry) {
-        try {
-            if (registry.getConfigSystemRegistry().getRegistryContext() != null &&
-                registry.getConfigSystemRegistry().getRegistryContext().getDataAccessManager()
-                        != null) {
-                DataAccessManager dataAccessManager =
-                        registry.getConfigSystemRegistry().getRegistryContext()
-                                .getDataAccessManager();
-                if (!(dataAccessManager instanceof JDBCDataAccessManager)) {
-                    String msg = "Failed to obtain DB connection. Invalid data access manager.";
-                    log.error(msg);
-                }
-                Connection dbConnection = null;
-                try {
-                    DataSource dataSource = ((JDBCDataAccessManager)dataAccessManager).getDataSource();
-                    dbConnection = dataSource.getConnection();
-                    dataHolder.setRegistryDBDriver(dbConnection.getMetaData().getDriverName());
-                } finally {
-                    if (dbConnection != null) {
-                        dbConnection.close();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            String msg = "Cannot get registry driver";
-            log.error(msg, e);
-        }
-    }
+//    private void setRegistryDriver(RegistryService registry) {
+//        try {
+//            if (registry.getConfigSystemRegistry().getRegistryContext() != null &&
+//                registry.getConfigSystemRegistry().getRegistryContext().getDataAccessManager()
+//                        != null) {
+//                DataAccessManager dataAccessManager =
+//                        registry.getConfigSystemRegistry().getRegistryContext()
+//                                .getDataAccessManager();
+//                if (!(dataAccessManager instanceof JDBCDataAccessManager)) {
+//                    String msg = "Failed to obtain DB connection. Invalid data access manager.";
+//                    log.error(msg);
+//                }
+//                Connection dbConnection = null;
+//                try {
+//                    DataSource dataSource = ((JDBCDataAccessManager)dataAccessManager).getDataSource();
+//                    dbConnection = dataSource.getConnection();
+//                    dataHolder.setRegistryDBDriver(dbConnection.getMetaData().getDriverName());
+//                } finally {
+//                    if (dbConnection != null) {
+//                        dbConnection.close();
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            String msg = "Cannot get registry driver";
+//            log.error(msg, e);
+//        }
+//    }
 
-    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, 
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-        dataHolder.setRegistryService(registryService);
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-        dataHolder.setRegistryService(null);
-        dataHolder.setRegistryDBDriver(null);
-    }
+//    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRegistryService")
+//    protected void setRegistryService(RegistryService registryService) {
+//        dataHolder.setRegistryService(registryService);
+//    }
+//
+//    protected void unsetRegistryService(RegistryService registryService) {
+//        dataHolder.setRegistryService(null);
+//        dataHolder.setRegistryDBDriver(null);
+//    }
 
     @Reference(name = "user.realmservice.default", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, 
             unbind = "unsetRealmService")

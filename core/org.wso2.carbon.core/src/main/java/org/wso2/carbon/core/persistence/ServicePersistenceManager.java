@@ -23,23 +23,16 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.Constants;
 import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.JavaUtils;
-import org.apache.axis2.util.PolicyUtil;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyComponent;
-import org.apache.neethi.PolicyEngine;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.Resources;
-import org.wso2.carbon.core.transports.TransportPersistenceManager;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 
 import javax.xml.namespace.QName;
@@ -152,189 +145,189 @@ public class ServicePersistenceManager extends AbstractPersistenceManager {
         }
     }
 
-    /**
-     * When a new service is deployed, persist all it's contents (operations, policies etc.)
-     * into the registry
-     *
-     * @param axisService - AxisService instance
-     * @throws Exception - on error
-     */
-    public void handleNewServiceAddition(AxisService axisService) throws Exception {
-        if (axisService.isClientSide()) {
-            return;
-        }
-        String sgName = axisService.getAxisServiceGroup().getServiceGroupName();
-        boolean isProxyService = PersistenceUtils.isProxyService(axisService);
-        synchronized (WRITE_LOCK) {
-            try {
-                getServiceGroupFilePM().beginTransaction(sgName);
-                configRegistry.beginTransaction();
-                //Add service
-                OMElement serviceElement = omFactory.createOMElement(Resources.ServiceProperties.SERVICE_XML_TAG, null);
-                serviceElement.addAttribute(Resources.NAME, axisService.getName(), null);
-                if (axisService.getDocumentation() != null) {
-                    serviceElement.addAttribute(
-                            Resources.ServiceProperties.DOCUMENTATION, axisService.getDocumentation(), null);
-                }
-                serviceElement.addAttribute(Resources.ServiceProperties.EXPOSED_ON_ALL_TANSPORTS,
-                        String.valueOf(axisService.isEnableAllTransports()), null);
-
-                long serviceDeployedTime = new Date().getTime();
-                axisService.addParameter(new Parameter(CarbonConstants
-                        .SERVICE_DEPLOYMENT_TIME_PARAM, serviceDeployedTime));
-                serviceElement.addAttribute(Resources.ServiceProperties.DEPLOYED_TIME,
-                        String.valueOf(serviceDeployedTime), null);
-
-                getServiceGroupFilePM().put(sgName, serviceElement, Resources.ServiceGroupProperties.ROOT_XPATH);
-
-                // Add Service Operations
-                String xpathToService = PersistenceUtils.getResourcePath(axisService);
-                for (Iterator iter = axisService.getOperations(); iter.hasNext(); ) {
-                    AxisOperation axisOperation = (AxisOperation) iter.next();
-                    //write Operation
-                    OMElement operation = PersistenceUtils.createOperation(
-                            axisOperation, axisOperation.getName().getLocalPart());
-                    serviceElement.addChild(operation);
-                    writeParameters(sgName, axisOperation.getParameters(), PersistenceUtils.
-                            getResourcePath(axisOperation)); //using axisService because it's the parent element here.
-                }
-
-                // Add Service Bindings
-                Map endPointMap = axisService.getEndpoints();
-                for (Object o : endPointMap.entrySet()) {
-                    Map.Entry entry = (Map.Entry) o;
-                    AxisBinding axisBinding = ((AxisEndpoint) entry.getValue()).getBinding();
-
-                    //  ROOT_XPATH[@name="xxx"]/bindings
-                    String bindingsPath = PersistenceUtils.getResourcePath(axisService) +
-                            "/" + Resources.ServiceProperties.BINDINGS;
-                    if (!getServiceGroupFilePM().elementExists(sgName, bindingsPath +
-                            "/" + Resources.ServiceProperties.BINDING_XML_TAG +
-                            PersistenceUtils.getXPathAttrPredicate(
-                                    Resources.NAME, axisBinding.getName().getLocalPart()))) {
-                        handleNewBindingAddition(axisService, axisBinding, bindingsPath);
-                    }
-                }
-
-                // Add the Service Policies
-                List<OMElement> servicePolicies = getServicePolicies(axisService);
-                String policiesPath = PersistenceUtils.
-                        getResourcePath(axisService) + "/" + Resources.POLICIES;
-                if (!getServiceGroupFilePM().elementExists(sgName, policiesPath)) {
-                    OMElement policiesEl = omFactory.createOMElement(Resources.POLICIES, null);
-                    getServiceGroupFilePM().put(sgName, policiesEl, PersistenceUtils.getResourcePath(axisService));
-                }
-                for (OMElement servicePolicy : servicePolicies) {
-                    getServiceGroupFilePM().put(sgName, servicePolicy, policiesPath);
-                }
-
-                //write the policy to registry as well if it's a proxy service
-                if (isProxyService && servicePolicies != null && !servicePolicies.isEmpty()) {
-                    org.wso2.carbon.registry.core.Resource serviceResource = configRegistry.newCollection();
-                    String serviceResourcePath = PersistenceUtils.getRegistryResourcePath(axisService);
-                    configRegistry.put(serviceResourcePath, serviceResource);
-
-                    for (OMElement wrappedServicePolicyElement : servicePolicies) {
-                        Policy servicePolicy = PolicyEngine.getPolicy(wrappedServicePolicyElement.getFirstChildWithName(
-                                new QName(Resources.WS_POLICY_NAMESPACE, "Policy")));  //note that P is capital
-
-                        Resource servicePolicyResource = PersistenceUtils.createPolicyResource(
-                                configRegistry, servicePolicy,
-                                servicePolicy.getId(),
-                                "" + servicePolicy.getType());
-
-                        configRegistry.put(serviceResourcePath + RegistryResources.POLICIES +
-                                servicePolicyResource.getProperty(RegistryResources.ModuleProperties.POLICY_UUID),
-                                servicePolicyResource);
-                    }
-                }
-
-                // If the service scope='soapsession', engage addressing if not already engaged.
-                if (axisService.getScope().equals(Constants.SCOPE_SOAP_SESSION) &&
-                        !axisService.isEngaged(ADDRESSING_MODULE)) {
-                    axisService.engageModule(axisService.getAxisConfiguration().getModule(
-                            ADDRESSING_MODULE));
-                }
-
-                // Add the Modules Engaged to this service
-                //this is how you handle associations of registry
-                for (Object node : axisService.getEngagedModules()) {
-                    AxisModule axisModule = (AxisModule) node;
-                    //we just put each modules inside top-level service element
-                    String version = PersistenceUtils.getModuleVersion(axisModule);
-                    if (!isGloballyEngaged(axisModule.getName(), version)
-                            && !axisService.getParent().isEngaged(axisModule.getName())) {
-                        OMElement module = omFactory.createOMElement(
-                                Resources.ModuleProperties.MODULE_XML_TAG, null);
-                        module.addAttribute(Resources.NAME, axisModule.getName(), null);
-                        module.addAttribute(Resources.VERSION, version, null);
-                        module.addAttribute(Resources.ModuleProperties.TYPE,
-                                Resources.Associations.ENGAGED_MODULES, null);
-
-                        getServiceGroupFilePM().put(sgName, module, Resources.ServiceProperties.ROOT_XPATH);
-                    }
-                }
-
-                // Save the operation-module engagements
-                for (Iterator iter = axisService.getOperations(); iter.hasNext(); ) {
-                    AxisOperation axisOperation = (AxisOperation) iter.next();
-                    for (Object o : axisOperation.getEngagedModules()) {
-                        AxisModule axisModule = (AxisModule) o;
-                        String version = PersistenceUtils.getModuleVersion(axisModule);
-                        if (!isGloballyEngaged(axisModule.getName(), version)
-                                && !axisService.getParent().isEngaged(axisModule.getName())
-                                && !axisService.isEngaged(axisModule.getName())) {
-                            OMElement module = PersistenceUtils.createModule(axisModule.getName(),
-                                    version,
-                                    Resources.Associations.ENGAGED_MODULES);
-
-                            getServiceGroupFilePM().put(sgName, module, PersistenceUtils
-                                    .getResourcePath(axisOperation));
-                        }
-                    }
-                }
-
-                // add the service parameters
-                writeParameters(sgName, axisService.getParameters(), xpathToService);
-
-                // add transport associations
-                if (!axisService.isEnableAllTransports()) {
-                    List<String> exposedTransports = axisService.getExposedTransports();
-                    for (String exposedTransport : exposedTransports) {
-                        Resource transportResource =
-                                new TransportPersistenceManager(axisConfig).
-                                        getTransportResource(exposedTransport);
-                        if (transportResource == null) {
-                            throw new CarbonException("The configuration resource " +
-                                    "for " + exposedTransport + " transport does not exist in Registry");
-                        }
-                        OMElement association = omFactory.createOMElement(
-                                Resources.Associations.ASSOCIATION_XML_TAG, null);
-                        association.addAttribute(Resources.Associations.DESTINATION_PATH,
-                                transportResource.getPath(), null);
-                        association.addAttribute(
-                                Resources.ModuleProperties.TYPE, Resources.Associations.EXPOSED_TRANSPORTS, null);
-                        getServiceGroupFilePM().put(sgName, association, xpathToService);
-                    }
-                }
-                serviceElement = (OMElement) getServiceGroupFilePM().get(sgName, xpathToService);
-                if (serviceElement != null) {
-                    serviceElement.addAttribute(Resources.SUCCESSFULLY_ADDED, "true", null);
-                    getServiceGroupFilePM().setMetaFileModification(sgName);
-                }
-
-                getServiceGroupFilePM().commitTransaction(sgName);
-                configRegistry.commitTransaction();
-                if (log.isDebugEnabled()) {
-                    log.debug("Added new service - " + axisService.getName());
-                }
-            } catch (Throwable e) {
-                configRegistry.rollbackTransaction();
-                handleExceptionWithRollback(sgName, "Unable to handle new service addition. Service: " +
-                        axisService.getName(), e);
-            }
-        }
-    }
+//    /**
+//     * When a new service is deployed, persist all it's contents (operations, policies etc.)
+//     * into the registry
+//     *
+//     * @param axisService - AxisService instance
+//     * @throws Exception - on error
+//     */
+//    public void handleNewServiceAddition(AxisService axisService) throws Exception {
+//        if (axisService.isClientSide()) {
+//            return;
+//        }
+//        String sgName = axisService.getAxisServiceGroup().getServiceGroupName();
+//        boolean isProxyService = PersistenceUtils.isProxyService(axisService);
+//        synchronized (WRITE_LOCK) {
+//            try {
+//                getServiceGroupFilePM().beginTransaction(sgName);
+//                configRegistry.beginTransaction();
+//                //Add service
+//                OMElement serviceElement = omFactory.createOMElement(Resources.ServiceProperties.SERVICE_XML_TAG, null);
+//                serviceElement.addAttribute(Resources.NAME, axisService.getName(), null);
+//                if (axisService.getDocumentation() != null) {
+//                    serviceElement.addAttribute(
+//                            Resources.ServiceProperties.DOCUMENTATION, axisService.getDocumentation(), null);
+//                }
+//                serviceElement.addAttribute(Resources.ServiceProperties.EXPOSED_ON_ALL_TANSPORTS,
+//                        String.valueOf(axisService.isEnableAllTransports()), null);
+//
+//                long serviceDeployedTime = new Date().getTime();
+//                axisService.addParameter(new Parameter(CarbonConstants
+//                        .SERVICE_DEPLOYMENT_TIME_PARAM, serviceDeployedTime));
+//                serviceElement.addAttribute(Resources.ServiceProperties.DEPLOYED_TIME,
+//                        String.valueOf(serviceDeployedTime), null);
+//
+//                getServiceGroupFilePM().put(sgName, serviceElement, Resources.ServiceGroupProperties.ROOT_XPATH);
+//
+//                // Add Service Operations
+//                String xpathToService = PersistenceUtils.getResourcePath(axisService);
+//                for (Iterator iter = axisService.getOperations(); iter.hasNext(); ) {
+//                    AxisOperation axisOperation = (AxisOperation) iter.next();
+//                    //write Operation
+//                    OMElement operation = PersistenceUtils.createOperation(
+//                            axisOperation, axisOperation.getName().getLocalPart());
+//                    serviceElement.addChild(operation);
+//                    writeParameters(sgName, axisOperation.getParameters(), PersistenceUtils.
+//                            getResourcePath(axisOperation)); //using axisService because it's the parent element here.
+//                }
+//
+//                // Add Service Bindings
+//                Map endPointMap = axisService.getEndpoints();
+//                for (Object o : endPointMap.entrySet()) {
+//                    Map.Entry entry = (Map.Entry) o;
+//                    AxisBinding axisBinding = ((AxisEndpoint) entry.getValue()).getBinding();
+//
+//                    //  ROOT_XPATH[@name="xxx"]/bindings
+//                    String bindingsPath = PersistenceUtils.getResourcePath(axisService) +
+//                            "/" + Resources.ServiceProperties.BINDINGS;
+//                    if (!getServiceGroupFilePM().elementExists(sgName, bindingsPath +
+//                            "/" + Resources.ServiceProperties.BINDING_XML_TAG +
+//                            PersistenceUtils.getXPathAttrPredicate(
+//                                    Resources.NAME, axisBinding.getName().getLocalPart()))) {
+//                        handleNewBindingAddition(axisService, axisBinding, bindingsPath);
+//                    }
+//                }
+//
+//                // Add the Service Policies
+//                List<OMElement> servicePolicies = getServicePolicies(axisService);
+//                String policiesPath = PersistenceUtils.
+//                        getResourcePath(axisService) + "/" + Resources.POLICIES;
+//                if (!getServiceGroupFilePM().elementExists(sgName, policiesPath)) {
+//                    OMElement policiesEl = omFactory.createOMElement(Resources.POLICIES, null);
+//                    getServiceGroupFilePM().put(sgName, policiesEl, PersistenceUtils.getResourcePath(axisService));
+//                }
+//                for (OMElement servicePolicy : servicePolicies) {
+//                    getServiceGroupFilePM().put(sgName, servicePolicy, policiesPath);
+//                }
+//
+//                //write the policy to registry as well if it's a proxy service
+//                if (isProxyService && servicePolicies != null && !servicePolicies.isEmpty()) {
+//                    org.wso2.carbon.registry.core.Resource serviceResource = configRegistry.newCollection();
+//                    String serviceResourcePath = PersistenceUtils.getRegistryResourcePath(axisService);
+//                    configRegistry.put(serviceResourcePath, serviceResource);
+//
+//                    for (OMElement wrappedServicePolicyElement : servicePolicies) {
+//                        Policy servicePolicy = PolicyEngine.getPolicy(wrappedServicePolicyElement.getFirstChildWithName(
+//                                new QName(Resources.WS_POLICY_NAMESPACE, "Policy")));  //note that P is capital
+//
+//                        Resource servicePolicyResource = PersistenceUtils.createPolicyResource(
+//                                configRegistry, servicePolicy,
+//                                servicePolicy.getId(),
+//                                "" + servicePolicy.getType());
+//
+//                        configRegistry.put(serviceResourcePath + RegistryResources.POLICIES +
+//                                servicePolicyResource.getProperty(RegistryResources.ModuleProperties.POLICY_UUID),
+//                                servicePolicyResource);
+//                    }
+//                }
+//
+//                // If the service scope='soapsession', engage addressing if not already engaged.
+//                if (axisService.getScope().equals(Constants.SCOPE_SOAP_SESSION) &&
+//                        !axisService.isEngaged(ADDRESSING_MODULE)) {
+//                    axisService.engageModule(axisService.getAxisConfiguration().getModule(
+//                            ADDRESSING_MODULE));
+//                }
+//
+//                // Add the Modules Engaged to this service
+//                //this is how you handle associations of registry
+//                for (Object node : axisService.getEngagedModules()) {
+//                    AxisModule axisModule = (AxisModule) node;
+//                    //we just put each modules inside top-level service element
+//                    String version = PersistenceUtils.getModuleVersion(axisModule);
+//                    if (!isGloballyEngaged(axisModule.getName(), version)
+//                            && !axisService.getParent().isEngaged(axisModule.getName())) {
+//                        OMElement module = omFactory.createOMElement(
+//                                Resources.ModuleProperties.MODULE_XML_TAG, null);
+//                        module.addAttribute(Resources.NAME, axisModule.getName(), null);
+//                        module.addAttribute(Resources.VERSION, version, null);
+//                        module.addAttribute(Resources.ModuleProperties.TYPE,
+//                                Resources.Associations.ENGAGED_MODULES, null);
+//
+//                        getServiceGroupFilePM().put(sgName, module, Resources.ServiceProperties.ROOT_XPATH);
+//                    }
+//                }
+//
+//                // Save the operation-module engagements
+//                for (Iterator iter = axisService.getOperations(); iter.hasNext(); ) {
+//                    AxisOperation axisOperation = (AxisOperation) iter.next();
+//                    for (Object o : axisOperation.getEngagedModules()) {
+//                        AxisModule axisModule = (AxisModule) o;
+//                        String version = PersistenceUtils.getModuleVersion(axisModule);
+//                        if (!isGloballyEngaged(axisModule.getName(), version)
+//                                && !axisService.getParent().isEngaged(axisModule.getName())
+//                                && !axisService.isEngaged(axisModule.getName())) {
+//                            OMElement module = PersistenceUtils.createModule(axisModule.getName(),
+//                                    version,
+//                                    Resources.Associations.ENGAGED_MODULES);
+//
+//                            getServiceGroupFilePM().put(sgName, module, PersistenceUtils
+//                                    .getResourcePath(axisOperation));
+//                        }
+//                    }
+//                }
+//
+//                // add the service parameters
+//                writeParameters(sgName, axisService.getParameters(), xpathToService);
+//
+//                // add transport associations
+//                if (!axisService.isEnableAllTransports()) {
+//                    List<String> exposedTransports = axisService.getExposedTransports();
+//                    for (String exposedTransport : exposedTransports) {
+//                        Resource transportResource =
+//                                new TransportPersistenceManager(axisConfig).
+//                                        getTransportResource(exposedTransport);
+//                        if (transportResource == null) {
+//                            throw new CarbonException("The configuration resource " +
+//                                    "for " + exposedTransport + " transport does not exist in Registry");
+//                        }
+//                        OMElement association = omFactory.createOMElement(
+//                                Resources.Associations.ASSOCIATION_XML_TAG, null);
+//                        association.addAttribute(Resources.Associations.DESTINATION_PATH,
+//                                transportResource.getPath(), null);
+//                        association.addAttribute(
+//                                Resources.ModuleProperties.TYPE, Resources.Associations.EXPOSED_TRANSPORTS, null);
+//                        getServiceGroupFilePM().put(sgName, association, xpathToService);
+//                    }
+//                }
+//                serviceElement = (OMElement) getServiceGroupFilePM().get(sgName, xpathToService);
+//                if (serviceElement != null) {
+//                    serviceElement.addAttribute(Resources.SUCCESSFULLY_ADDED, "true", null);
+//                    getServiceGroupFilePM().setMetaFileModification(sgName);
+//                }
+//
+//                getServiceGroupFilePM().commitTransaction(sgName);
+//                configRegistry.commitTransaction();
+//                if (log.isDebugEnabled()) {
+//                    log.debug("Added new service - " + axisService.getName());
+//                }
+//            } catch (Throwable e) {
+//                configRegistry.rollbackTransaction();
+//                handleExceptionWithRollback(sgName, "Unable to handle new service addition. Service: " +
+//                        axisService.getName(), e);
+//            }
+//        }
+//    }
 
     /**
      * Bindings xml format
@@ -684,39 +677,39 @@ public class ServicePersistenceManager extends AbstractPersistenceManager {
                             .EXPOSED_ON_ALL_TANSPORTS, String.valueOf(false), null);
                 }
 
-                // Adding the transports to the file
-                while (transportItr.hasNext()) {
-                    String transport = transportItr.next();
-                    Resource transportResource =
-                            new TransportPersistenceManager(axisConfig).
-                                    getTransportResource(transport);
-                    if (transportResource == null) {
-                        throw new CarbonException("The configuration resource for " + transport +
-                                " transport does not exist");
-                    }
-                    OMElement association = PersistenceUtils.createAssociation(
-                            transportResource.getPath(), Resources.Associations.EXPOSED_TRANSPORTS);
-                    getServiceGroupFilePM().put(serviceGroupId, association, serviceElementPath);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Added " + transport + " transport binding for " +
-                                axisService.getName() + " service");
-                    }
-                }
+//                // Adding the transports to the file
+//                while (transportItr.hasNext()) {
+//                    String transport = transportItr.next();
+//                    Resource transportResource =
+//                            new TransportPersistenceManager(axisConfig).
+//                                    getTransportResource(transport);
+//                    if (transportResource == null) {
+//                        throw new CarbonException("The configuration resource for " + transport +
+//                                " transport does not exist");
+//                    }
+//                    OMElement association = PersistenceUtils.createAssociation(
+//                            transportResource.getPath(), Resources.Associations.EXPOSED_TRANSPORTS);
+//                    getServiceGroupFilePM().put(serviceGroupId, association, serviceElementPath);
+//                    if (log.isDebugEnabled()) {
+//                        log.debug("Added " + transport + " transport binding for " +
+//                                axisService.getName() + " service");
+//                    }
+//                }
             } else {
                 if (!Boolean.valueOf(serviceElement.getAttributeValue(
                         new QName(Resources.ServiceProperties.EXPOSED_ON_ALL_TANSPORTS)))) {
                     axisService.setExposedTransports(new ArrayList());
                     List associations = getServiceGroupFilePM().getAssociations(serviceGroupId, serviceElementPath,
                             Resources.Associations.EXPOSED_TRANSPORTS);
-                    for (Object node : associations) {
-                        String destinationPath = ((OMElement) node).getAttributeValue(
-                                new QName(Resources.Associations.DESTINATION_PATH));
-                        Resource resource = configRegistry.get(destinationPath);
-                        String transportProtocol = resource
-                                .getProperty(RegistryResources.Transports.PROTOCOL_NAME);
-                        axisService.addExposedTransport(transportProtocol);
-                        resource.discard();
-                    }
+//                    for (Object node : associations) {
+//                        String destinationPath = ((OMElement) node).getAttributeValue(
+//                                new QName(Resources.Associations.DESTINATION_PATH));
+//                        Resource resource = configRegistry.get(destinationPath);
+//                        String transportProtocol = resource
+//                                .getProperty(RegistryResources.Transports.PROTOCOL_NAME);
+//                        axisService.addExposedTransport(transportProtocol);
+//                        resource.discard();
+//                    }
                 }
             }
 
@@ -978,297 +971,297 @@ public class ServicePersistenceManager extends AbstractPersistenceManager {
         return returnValue;
     }*/
 
-    /**
-     * Removes an exposed transport from a given service.
-     *
-     * @param serviceName       - Name of the service where new transport to be removed.
-     * @param transportProtocol - Name of the transport to be removed.
-     * @throws Exception - on error
-     */
-    public void removeExposedTransports(String serviceName,
-                                        String transportProtocol) throws Exception {
-        AxisService axisService = axisConfig.getServiceForActivation(serviceName);
-
-        if (axisService == null) {
-            handleException("No service found for the provided service name : " + serviceName);
-            return;
-        }
-
-        String serviceGroupId = axisService.getAxisServiceGroup().getServiceGroupName();
-
-        try {
-            Resource transportResource =
-                    new TransportPersistenceManager(axisConfig).
-                            getTransportResource(transportProtocol);
-
-            boolean transactionStarted = getServiceGroupFilePM().isTransactionStarted(serviceGroupId);
-            if (!transactionStarted) {
-                getServiceGroupFilePM().beginTransaction(serviceGroupId);
-            }
-
-            //OMElement serviceElement = getService(axisService);
-            if (transportResource != null) {
-                String transportXPath = PersistenceUtils.getResourcePath(axisService) +
-                        "/" + Resources.Associations.ASSOCIATION_XML_TAG +
-                        PersistenceUtils.getXPathAttrPredicate(
-                                Resources.Associations.DESTINATION_PATH, transportResource.getPath()) +
-                        PersistenceUtils.getXPathAttrPredicate(
-                                Resources.ModuleProperties.TYPE, Resources.Associations.EXPOSED_TRANSPORTS);
-                if (getServiceGroupFilePM().elementExists(serviceGroupId, transportXPath)) {
-                    getServiceGroupFilePM().delete(serviceGroupId,
-                            PersistenceUtils.getResourcePath(axisService) +
-                                    "/" + Resources.Associations.ASSOCIATION_XML_TAG +
-                                    PersistenceUtils.getXPathAttrPredicate(
-                                            Resources.Associations.DESTINATION_PATH, transportResource.getPath()) +
-                                    PersistenceUtils.getXPathAttrPredicate(
-                                            Resources.ModuleProperties.TYPE, Resources.Associations.EXPOSED_TRANSPORTS));
-                }
-                transportResource.discard();
-            }
-
-            List<String> exposedTrps = axisService.getExposedTransports();
-            for (String transport : exposedTrps) {
-                transportResource =
-                        new TransportPersistenceManager(axisConfig).getTransportResource(transport);
-                if (transportResource == null) {
-                    throw new CarbonException("The configuration resource for " + transport +
-                            " transport does not exist");
-                }
-                OMElement assocElement = PersistenceUtils.createAssociation(
-                        transportResource.getPath(), Resources.Associations.EXPOSED_TRANSPORTS);
-                String assocPath = PersistenceUtils.getResourcePath(axisService) +
-                        "/" + Resources.Associations.ASSOCIATION_XML_TAG +
-                        PersistenceUtils.getXPathAttrPredicate(
-                                Resources.Associations.DESTINATION_PATH, transportResource.getPath()) +
-                        PersistenceUtils.getXPathAttrPredicate(
-                                Resources.ModuleProperties.TYPE, Resources.Associations.EXPOSED_TRANSPORTS);
-
-                if (!getServiceGroupFilePM().elementExists(serviceGroupId, assocPath)) {
-                    getServiceGroupFilePM().put(
-                            serviceGroupId, assocElement, PersistenceUtils.getResourcePath(axisService));
-                }
-                transportResource.discard();
-            }
-
-            setServiceProperty(axisService, Resources.ServiceProperties.EXPOSED_ON_ALL_TANSPORTS, String.valueOf(false));
-
-            if (!transactionStarted) {
-                getServiceGroupFilePM().commitTransaction(serviceGroupId);
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully removed " + transportProtocol + " transport from " +
-                        serviceName + "service");
-            }
-        } catch (Exception e) {
-            handleExceptionWithRollback(serviceGroupId, "Error while removing exposed transport : " +
-                    transportProtocol, e);
-        }
-    }
-
-    /**
-     * Extract all the policies from the AxisService and create registry Resources for them.
-     *
-     * @param axisService Service to get policies
-     * @return A list of "wrapped" policy elements
-     * @throws Exception on error
-     */
-    private List<OMElement> getServicePolicies(AxisService axisService) throws Exception {
-        // List of policy resources to be returned
-        List<OMElement> policyElements = new ArrayList<OMElement>();
-        String serviceGroupId = axisService.getAxisServiceGroup().getServiceGroupName();
-        String serviceXPath = PersistenceUtils.getResourcePath(axisService);
-
-        // Get Service Policy
-        List<PolicyComponent> servicePolicyList = new ArrayList<PolicyComponent>(axisService
-                .getPolicySubject().getAttachedPolicyComponents());
-        Policy servicePolicy = PolicyUtil.getMergedPolicy(servicePolicyList, axisService);
-
-        if (servicePolicy != null) {
-            // Add this policy as a resource to the list
-            addPolicyElement(policyElements, servicePolicy, PolicyInclude.AXIS_SERVICE_POLICY);
-            // Refer this policy from the service
-            setResourcePolicyId(axisService.getAxisServiceGroup().getServiceGroupName(),
-                    serviceXPath, servicePolicy.getId());
-        }
-
-        // Get Service Operation Policies
-        Iterator serviceOperations = axisService.getOperations();
-        while (serviceOperations.hasNext()) {
-            AxisOperation axisOperation = (AxisOperation) serviceOperations.next();
-            String opXPath = PersistenceUtils.getResourcePath(axisOperation);
-            if (!getServiceGroupFilePM().elementExists(
-                    axisService.getAxisServiceGroup().getServiceGroupName(), opXPath)) {
-                continue;
-            }
-
-            OMElement operationElement = (OMElement) getServiceGroupFilePM().get(
-                    axisService.getAxisServiceGroup().getServiceGroupName(), opXPath);
-            //Get the operation policy
-            List<PolicyComponent> opPolicyList = new ArrayList<PolicyComponent>(
-                    axisOperation.getPolicySubject().getAttachedPolicyComponents());
-            Policy operationPolicy = PolicyUtil.getMergedPolicy(opPolicyList, axisOperation);
-
-            if (operationPolicy != null) {
-                // Add this policy as a resource to the list
-                addPolicyElement(policyElements, operationPolicy, PolicyInclude.AXIS_OPERATION_POLICY);
-                // Refer this policy from the operation resource
-                OMElement idElement = omFactory.createOMElement(Resources.ServiceProperties.POLICY_UUID, null);
-                idElement.setText(operationPolicy.getId());
-                operationElement.addChild(idElement);
-//                operationElement.addAttribute(Resources.ServiceProperties.POLICY_UUID,
-//                        operationPolicy.getId(), null);
-            }
-
-            if (!(axisOperation instanceof OutOnlyAxisOperation)) {
-                // Get Service Operation Message Policies
-                AxisMessage axisInMessage = axisOperation
-                        .getMessage(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
-
-                // Get the message in policy
-                List<PolicyComponent> messageInPolicyList = new ArrayList<PolicyComponent>(
-                        axisInMessage.getPolicySubject().getAttachedPolicyComponents());
-                Policy messageInPolicy = PolicyUtil.getMergedPolicy(messageInPolicyList, axisInMessage);
-
-                if (messageInPolicy != null) {
-                    // Add this policy as a resource to the list
-                    addPolicyElement(policyElements, messageInPolicy, PolicyInclude.AXIS_MESSAGE_POLICY);
-                    // Refer this policy from the operation resource
-                    operationElement.addAttribute(Resources.ServiceProperties
-                            .MESSAGE_IN_POLICY_UUID, messageInPolicy.getId(), null);
-                }
-            }
-
-            // Get the message out policy
-            if (!(axisOperation instanceof InOnlyAxisOperation)) {
-                AxisMessage axisOutMessage = axisOperation
-                        .getMessage(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
-                List<PolicyComponent> messageOutPolicyList = new ArrayList<PolicyComponent>(
-                        axisOutMessage.getPolicySubject().getAttachedPolicyComponents());
-                Policy messageOutPolicy = PolicyUtil
-                        .getMergedPolicy(messageOutPolicyList, axisOutMessage);
-
-                if (messageOutPolicy != null) {
-                    // Add this policy as a resource to the list
-                    addPolicyElement(policyElements, messageOutPolicy, PolicyInclude.AXIS_MESSAGE_POLICY);
-                    // Refer this policy from the operation resource
-                    operationElement.addAttribute(Resources.ServiceProperties
-                            .MESSAGE_OUT_POLICY_UUID, messageOutPolicy.getId(), null);
-                }
-            }
-
-            // Update the operation resource in configRegistry
-            getServiceGroupFilePM().put(serviceGroupId, operationElement,
-                    PersistenceUtils.getResourcePath(axisService));
-        }
-
-        // Get binding policies
-        Map endPointMap = axisService.getEndpoints();
-
-        /**
-         * We don't have a way of accessing all bindings directly from axis service. Therefore,
-         * we have to access those through endpoints. So the same binding can be found again and
-         * again. To remove that overhead, we memorize the treated bindings.
-         */
-        ArrayList<String> bindingsList = new ArrayList<String>();
-        for (Object o : endPointMap.entrySet()) {
-            Map.Entry entry = (Map.Entry) o;
-            AxisBinding currentAxisBinding = ((AxisEndpoint) entry.getValue()).getBinding();
-
-            if (bindingsList.contains(currentAxisBinding.getName().getLocalPart())) {
-                continue;
-            }
-            // If we process this binding, add it's name to our list
-            bindingsList.add(currentAxisBinding.getName().getLocalPart());
-
-            // Get current binding Policy
-            List<PolicyComponent> bindingPolicyList = new ArrayList<PolicyComponent>(
-                    currentAxisBinding.getPolicySubject().getAttachedPolicyComponents());
-            Policy bindingPolicy = PolicyUtil
-                    .getMergedPolicy(bindingPolicyList, currentAxisBinding);
-
-            if (bindingPolicy != null) {
-                // Add this policy as a resource to the list
-                addPolicyElement(policyElements, bindingPolicy, PolicyInclude.BINDING_POLICY);
-                // Refer this policy from the binding resource
-                setResourcePolicyId(axisService.getAxisServiceGroup().getServiceGroupName(),
-                        PersistenceUtils.getBindingPath(serviceXPath, currentAxisBinding),
-                        bindingPolicy.getId());
-            }
-
-            // Get Binding Operation Policies
-            Iterator operations = currentAxisBinding.getChildren();
-            while (operations.hasNext()) {
-                AxisBindingOperation currentOperation = (AxisBindingOperation) operations.next();
-                String opPath = PersistenceUtils
-                        .getBindingOperationPath(serviceXPath, currentOperation);
-                if (!getServiceGroupFilePM().elementExists(serviceGroupId, opPath)) {
-                    continue;
-                }
-                OMElement bindingOperationElement = (OMElement) getServiceGroupFilePM().get(serviceGroupId, opPath);
-
-                // Get current binding operation policy
-                List<PolicyComponent> boPolicyList = new ArrayList<PolicyComponent>(
-                        currentOperation.getPolicySubject().getAttachedPolicyComponents());
-                Policy boPolicy = PolicyUtil.getMergedPolicy(boPolicyList, currentOperation);
-
-                if (boPolicy != null) {
-                    // Add this policy as a resource to the list
-                    addPolicyElement(policyElements,
-                            boPolicy, PolicyInclude.BINDING_OPERATION_POLICY);
-                    // Refer this policy from the binding operation
-                    OMElement idElement = omFactory.createOMElement(Resources.ServiceProperties.POLICY_UUID, null);
-                    idElement.setText(boPolicy.getId());
-                    bindingOperationElement.addChild(idElement);
-//                    bindingOperationElement.addAttribute(Resources
-//                            .ServiceProperties.POLICY_UUID, boPolicy.getId(), null);
-                }
-
-                // Get Binding Operation Message Policies
-                AxisDescription boMessageIn = currentOperation
-                        .getChild(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
-                if (boMessageIn != null) {
-                    List<PolicyComponent> boMessageInPolicyList = new ArrayList<PolicyComponent>(
-                            boMessageIn.getPolicySubject().getAttachedPolicyComponents());
-                    Policy boMessageInPolicy = PolicyUtil
-                            .getMergedPolicy(boMessageInPolicyList, boMessageIn);
-
-                    if (boMessageInPolicy != null) {
-                        // Add this policy as a resource to the list
-                        addPolicyElement(policyElements,
-                                boMessageInPolicy, PolicyInclude.BINDING_INPUT_POLICY);
-                        // Refer this policy from the binding operation
-                        bindingOperationElement.addAttribute(Resources.ServiceProperties
-                                .MESSAGE_IN_POLICY_UUID, boMessageInPolicy.getId(), null);
-                    }
-                }
-
-                // Get binding operaion out policy
-                AxisDescription boMessageOut = currentOperation
-                        .getChild(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
-                if (boMessageOut != null) {
-                    List<PolicyComponent> boMessageOutPolicyList = new ArrayList<PolicyComponent>(
-                            boMessageOut.getPolicySubject().getAttachedPolicyComponents());
-                    Policy boMessageOutPolicy = PolicyUtil
-                            .getMergedPolicy(boMessageOutPolicyList, boMessageOut);
-
-                    if (boMessageOutPolicy != null) {
-                        // Add this policy as a resource to the list
-                        addPolicyElement(policyElements,
-                                boMessageOutPolicy, PolicyInclude.BINDING_OUTPUT_POLICY);
-                        // Refer this policy from the binding operation
-                        bindingOperationElement.addAttribute(Resources.ServiceProperties
-                                .MESSAGE_OUT_POLICY_UUID, boMessageOutPolicy.getId(), null);
-                    }
-                }
-
-                // Update binding operation resource in configRegistry
-                getServiceGroupFilePM().put(serviceGroupId, bindingOperationElement,
-                        PersistenceUtils.getBindingPath(serviceXPath, currentAxisBinding));
-            }
-        }
-        return policyElements;
-    }
+//    /**
+//     * Removes an exposed transport from a given service.
+//     *
+//     * @param serviceName       - Name of the service where new transport to be removed.
+//     * @param transportProtocol - Name of the transport to be removed.
+//     * @throws Exception - on error
+//     */
+//    public void removeExposedTransports(String serviceName,
+//                                        String transportProtocol) throws Exception {
+//        AxisService axisService = axisConfig.getServiceForActivation(serviceName);
+//
+//        if (axisService == null) {
+//            handleException("No service found for the provided service name : " + serviceName);
+//            return;
+//        }
+//
+//        String serviceGroupId = axisService.getAxisServiceGroup().getServiceGroupName();
+//
+//        try {
+//            Resource transportResource =
+//                    new TransportPersistenceManager(axisConfig).
+//                            getTransportResource(transportProtocol);
+//
+//            boolean transactionStarted = getServiceGroupFilePM().isTransactionStarted(serviceGroupId);
+//            if (!transactionStarted) {
+//                getServiceGroupFilePM().beginTransaction(serviceGroupId);
+//            }
+//
+//            //OMElement serviceElement = getService(axisService);
+//            if (transportResource != null) {
+//                String transportXPath = PersistenceUtils.getResourcePath(axisService) +
+//                        "/" + Resources.Associations.ASSOCIATION_XML_TAG +
+//                        PersistenceUtils.getXPathAttrPredicate(
+//                                Resources.Associations.DESTINATION_PATH, transportResource.getPath()) +
+//                        PersistenceUtils.getXPathAttrPredicate(
+//                                Resources.ModuleProperties.TYPE, Resources.Associations.EXPOSED_TRANSPORTS);
+//                if (getServiceGroupFilePM().elementExists(serviceGroupId, transportXPath)) {
+//                    getServiceGroupFilePM().delete(serviceGroupId,
+//                            PersistenceUtils.getResourcePath(axisService) +
+//                                    "/" + Resources.Associations.ASSOCIATION_XML_TAG +
+//                                    PersistenceUtils.getXPathAttrPredicate(
+//                                            Resources.Associations.DESTINATION_PATH, transportResource.getPath()) +
+//                                    PersistenceUtils.getXPathAttrPredicate(
+//                                            Resources.ModuleProperties.TYPE, Resources.Associations.EXPOSED_TRANSPORTS));
+//                }
+//                transportResource.discard();
+//            }
+//
+//            List<String> exposedTrps = axisService.getExposedTransports();
+//            for (String transport : exposedTrps) {
+//                transportResource =
+//                        new TransportPersistenceManager(axisConfig).getTransportResource(transport);
+//                if (transportResource == null) {
+//                    throw new CarbonException("The configuration resource for " + transport +
+//                            " transport does not exist");
+//                }
+//                OMElement assocElement = PersistenceUtils.createAssociation(
+//                        transportResource.getPath(), Resources.Associations.EXPOSED_TRANSPORTS);
+//                String assocPath = PersistenceUtils.getResourcePath(axisService) +
+//                        "/" + Resources.Associations.ASSOCIATION_XML_TAG +
+//                        PersistenceUtils.getXPathAttrPredicate(
+//                                Resources.Associations.DESTINATION_PATH, transportResource.getPath()) +
+//                        PersistenceUtils.getXPathAttrPredicate(
+//                                Resources.ModuleProperties.TYPE, Resources.Associations.EXPOSED_TRANSPORTS);
+//
+//                if (!getServiceGroupFilePM().elementExists(serviceGroupId, assocPath)) {
+//                    getServiceGroupFilePM().put(
+//                            serviceGroupId, assocElement, PersistenceUtils.getResourcePath(axisService));
+//                }
+//                transportResource.discard();
+//            }
+//
+//            setServiceProperty(axisService, Resources.ServiceProperties.EXPOSED_ON_ALL_TANSPORTS, String.valueOf(false));
+//
+//            if (!transactionStarted) {
+//                getServiceGroupFilePM().commitTransaction(serviceGroupId);
+//            }
+//
+//            if (log.isDebugEnabled()) {
+//                log.debug("Successfully removed " + transportProtocol + " transport from " +
+//                        serviceName + "service");
+//            }
+//        } catch (Exception e) {
+//            handleExceptionWithRollback(serviceGroupId, "Error while removing exposed transport : " +
+//                    transportProtocol, e);
+//        }
+//    }
+//
+//    /**
+//     * Extract all the policies from the AxisService and create registry Resources for them.
+//     *
+//     * @param axisService Service to get policies
+//     * @return A list of "wrapped" policy elements
+//     * @throws Exception on error
+//     */
+//    private List<OMElement> getServicePolicies(AxisService axisService) throws Exception {
+//        // List of policy resources to be returned
+//        List<OMElement> policyElements = new ArrayList<OMElement>();
+//        String serviceGroupId = axisService.getAxisServiceGroup().getServiceGroupName();
+//        String serviceXPath = PersistenceUtils.getResourcePath(axisService);
+//
+//        // Get Service Policy
+//        List<PolicyComponent> servicePolicyList = new ArrayList<PolicyComponent>(axisService
+//                .getPolicySubject().getAttachedPolicyComponents());
+//        Policy servicePolicy = PolicyUtil.getMergedPolicy(servicePolicyList, axisService);
+//
+//        if (servicePolicy != null) {
+//            // Add this policy as a resource to the list
+//            addPolicyElement(policyElements, servicePolicy, PolicyInclude.AXIS_SERVICE_POLICY);
+//            // Refer this policy from the service
+//            setResourcePolicyId(axisService.getAxisServiceGroup().getServiceGroupName(),
+//                    serviceXPath, servicePolicy.getId());
+//        }
+//
+//        // Get Service Operation Policies
+//        Iterator serviceOperations = axisService.getOperations();
+//        while (serviceOperations.hasNext()) {
+//            AxisOperation axisOperation = (AxisOperation) serviceOperations.next();
+//            String opXPath = PersistenceUtils.getResourcePath(axisOperation);
+//            if (!getServiceGroupFilePM().elementExists(
+//                    axisService.getAxisServiceGroup().getServiceGroupName(), opXPath)) {
+//                continue;
+//            }
+//
+//            OMElement operationElement = (OMElement) getServiceGroupFilePM().get(
+//                    axisService.getAxisServiceGroup().getServiceGroupName(), opXPath);
+//            //Get the operation policy
+//            List<PolicyComponent> opPolicyList = new ArrayList<PolicyComponent>(
+//                    axisOperation.getPolicySubject().getAttachedPolicyComponents());
+//            Policy operationPolicy = PolicyUtil.getMergedPolicy(opPolicyList, axisOperation);
+//
+//            if (operationPolicy != null) {
+//                // Add this policy as a resource to the list
+//                addPolicyElement(policyElements, operationPolicy, PolicyInclude.AXIS_OPERATION_POLICY);
+//                // Refer this policy from the operation resource
+//                OMElement idElement = omFactory.createOMElement(Resources.ServiceProperties.POLICY_UUID, null);
+//                idElement.setText(operationPolicy.getId());
+//                operationElement.addChild(idElement);
+////                operationElement.addAttribute(Resources.ServiceProperties.POLICY_UUID,
+////                        operationPolicy.getId(), null);
+//            }
+//
+//            if (!(axisOperation instanceof OutOnlyAxisOperation)) {
+//                // Get Service Operation Message Policies
+//                AxisMessage axisInMessage = axisOperation
+//                        .getMessage(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
+//
+//                // Get the message in policy
+//                List<PolicyComponent> messageInPolicyList = new ArrayList<PolicyComponent>(
+//                        axisInMessage.getPolicySubject().getAttachedPolicyComponents());
+//                Policy messageInPolicy = PolicyUtil.getMergedPolicy(messageInPolicyList, axisInMessage);
+//
+//                if (messageInPolicy != null) {
+//                    // Add this policy as a resource to the list
+//                    addPolicyElement(policyElements, messageInPolicy, PolicyInclude.AXIS_MESSAGE_POLICY);
+//                    // Refer this policy from the operation resource
+//                    operationElement.addAttribute(Resources.ServiceProperties
+//                            .MESSAGE_IN_POLICY_UUID, messageInPolicy.getId(), null);
+//                }
+//            }
+//
+//            // Get the message out policy
+//            if (!(axisOperation instanceof InOnlyAxisOperation)) {
+//                AxisMessage axisOutMessage = axisOperation
+//                        .getMessage(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
+//                List<PolicyComponent> messageOutPolicyList = new ArrayList<PolicyComponent>(
+//                        axisOutMessage.getPolicySubject().getAttachedPolicyComponents());
+//                Policy messageOutPolicy = PolicyUtil
+//                        .getMergedPolicy(messageOutPolicyList, axisOutMessage);
+//
+//                if (messageOutPolicy != null) {
+//                    // Add this policy as a resource to the list
+//                    addPolicyElement(policyElements, messageOutPolicy, PolicyInclude.AXIS_MESSAGE_POLICY);
+//                    // Refer this policy from the operation resource
+//                    operationElement.addAttribute(Resources.ServiceProperties
+//                            .MESSAGE_OUT_POLICY_UUID, messageOutPolicy.getId(), null);
+//                }
+//            }
+//
+//            // Update the operation resource in configRegistry
+//            getServiceGroupFilePM().put(serviceGroupId, operationElement,
+//                    PersistenceUtils.getResourcePath(axisService));
+//        }
+//
+//        // Get binding policies
+//        Map endPointMap = axisService.getEndpoints();
+//
+//        /**
+//         * We don't have a way of accessing all bindings directly from axis service. Therefore,
+//         * we have to access those through endpoints. So the same binding can be found again and
+//         * again. To remove that overhead, we memorize the treated bindings.
+//         */
+//        ArrayList<String> bindingsList = new ArrayList<String>();
+//        for (Object o : endPointMap.entrySet()) {
+//            Map.Entry entry = (Map.Entry) o;
+//            AxisBinding currentAxisBinding = ((AxisEndpoint) entry.getValue()).getBinding();
+//
+//            if (bindingsList.contains(currentAxisBinding.getName().getLocalPart())) {
+//                continue;
+//            }
+//            // If we process this binding, add it's name to our list
+//            bindingsList.add(currentAxisBinding.getName().getLocalPart());
+//
+//            // Get current binding Policy
+//            List<PolicyComponent> bindingPolicyList = new ArrayList<PolicyComponent>(
+//                    currentAxisBinding.getPolicySubject().getAttachedPolicyComponents());
+//            Policy bindingPolicy = PolicyUtil
+//                    .getMergedPolicy(bindingPolicyList, currentAxisBinding);
+//
+//            if (bindingPolicy != null) {
+//                // Add this policy as a resource to the list
+//                addPolicyElement(policyElements, bindingPolicy, PolicyInclude.BINDING_POLICY);
+//                // Refer this policy from the binding resource
+//                setResourcePolicyId(axisService.getAxisServiceGroup().getServiceGroupName(),
+//                        PersistenceUtils.getBindingPath(serviceXPath, currentAxisBinding),
+//                        bindingPolicy.getId());
+//            }
+//
+//            // Get Binding Operation Policies
+//            Iterator operations = currentAxisBinding.getChildren();
+//            while (operations.hasNext()) {
+//                AxisBindingOperation currentOperation = (AxisBindingOperation) operations.next();
+//                String opPath = PersistenceUtils
+//                        .getBindingOperationPath(serviceXPath, currentOperation);
+//                if (!getServiceGroupFilePM().elementExists(serviceGroupId, opPath)) {
+//                    continue;
+//                }
+//                OMElement bindingOperationElement = (OMElement) getServiceGroupFilePM().get(serviceGroupId, opPath);
+//
+//                // Get current binding operation policy
+//                List<PolicyComponent> boPolicyList = new ArrayList<PolicyComponent>(
+//                        currentOperation.getPolicySubject().getAttachedPolicyComponents());
+//                Policy boPolicy = PolicyUtil.getMergedPolicy(boPolicyList, currentOperation);
+//
+//                if (boPolicy != null) {
+//                    // Add this policy as a resource to the list
+//                    addPolicyElement(policyElements,
+//                            boPolicy, PolicyInclude.BINDING_OPERATION_POLICY);
+//                    // Refer this policy from the binding operation
+//                    OMElement idElement = omFactory.createOMElement(Resources.ServiceProperties.POLICY_UUID, null);
+//                    idElement.setText(boPolicy.getId());
+//                    bindingOperationElement.addChild(idElement);
+////                    bindingOperationElement.addAttribute(Resources
+////                            .ServiceProperties.POLICY_UUID, boPolicy.getId(), null);
+//                }
+//
+//                // Get Binding Operation Message Policies
+//                AxisDescription boMessageIn = currentOperation
+//                        .getChild(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
+//                if (boMessageIn != null) {
+//                    List<PolicyComponent> boMessageInPolicyList = new ArrayList<PolicyComponent>(
+//                            boMessageIn.getPolicySubject().getAttachedPolicyComponents());
+//                    Policy boMessageInPolicy = PolicyUtil
+//                            .getMergedPolicy(boMessageInPolicyList, boMessageIn);
+//
+//                    if (boMessageInPolicy != null) {
+//                        // Add this policy as a resource to the list
+//                        addPolicyElement(policyElements,
+//                                boMessageInPolicy, PolicyInclude.BINDING_INPUT_POLICY);
+//                        // Refer this policy from the binding operation
+//                        bindingOperationElement.addAttribute(Resources.ServiceProperties
+//                                .MESSAGE_IN_POLICY_UUID, boMessageInPolicy.getId(), null);
+//                    }
+//                }
+//
+//                // Get binding operaion out policy
+//                AxisDescription boMessageOut = currentOperation
+//                        .getChild(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
+//                if (boMessageOut != null) {
+//                    List<PolicyComponent> boMessageOutPolicyList = new ArrayList<PolicyComponent>(
+//                            boMessageOut.getPolicySubject().getAttachedPolicyComponents());
+//                    Policy boMessageOutPolicy = PolicyUtil
+//                            .getMergedPolicy(boMessageOutPolicyList, boMessageOut);
+//
+//                    if (boMessageOutPolicy != null) {
+//                        // Add this policy as a resource to the list
+//                        addPolicyElement(policyElements,
+//                                boMessageOutPolicy, PolicyInclude.BINDING_OUTPUT_POLICY);
+//                        // Refer this policy from the binding operation
+//                        bindingOperationElement.addAttribute(Resources.ServiceProperties
+//                                .MESSAGE_OUT_POLICY_UUID, boMessageOutPolicy.getId(), null);
+//                    }
+//                }
+//
+//                // Update binding operation resource in configRegistry
+//                getServiceGroupFilePM().put(serviceGroupId, bindingOperationElement,
+//                        PersistenceUtils.getBindingPath(serviceXPath, currentAxisBinding));
+//            }
+//        }
+//        return policyElements;
+//    }
 
     /**
      * Sets the policy Id for a resource of a service, operation, binding etc..

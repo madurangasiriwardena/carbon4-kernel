@@ -26,7 +26,6 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.context.CarbonCoreInitializedEvent;
 import org.wso2.carbon.context.CarbonCoreInitializedEventImpl;
-import org.wso2.carbon.registry.api.RegistryService;
 import org.wso2.carbon.user.api.UserRealmService;
 
 @Component(name = "org.wso2.carbon.context.internal.CarbonContextServiceComponent", immediate = true)
@@ -43,15 +42,15 @@ public class CarbonContextServiceComponent {
     protected void deactivate(ComponentContext componentContext) {
     }
 
-    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, 
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-        dataHolder.setRegistryService(registryService);
-    }
+//    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRegistryService")
+//    protected void setRegistryService(RegistryService registryService) {
+//        dataHolder.setRegistryService(registryService);
+//    }
 
-    protected void unsetRegistryService(RegistryService registryService) {
-        dataHolder.setRegistryService(null);
-    }
+//    protected void unsetRegistryService(RegistryService registryService) {
+//        dataHolder.setRegistryService(null);
+//    }
 
     @Reference(name = "userRealmService", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, 
             unbind = "unsetUserRealmService")

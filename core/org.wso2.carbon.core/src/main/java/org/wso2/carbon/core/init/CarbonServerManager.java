@@ -53,12 +53,10 @@ import org.wso2.carbon.core.CarbonAxisConfigurator;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
 import org.wso2.carbon.core.CarbonThreadCleanup;
 import org.wso2.carbon.core.CarbonThreadFactory;
-import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.ServerInitializer;
 import org.wso2.carbon.core.ServerManagement;
 import org.wso2.carbon.core.ServerStatus;
 import org.wso2.carbon.core.deployment.OSGiAxis2ServiceDeployer;
-import org.wso2.carbon.core.deployment.RegistryBasedRepositoryUpdater;
 import org.wso2.carbon.core.internal.CarbonCoreDataHolder;
 import org.wso2.carbon.core.internal.CarbonCoreServiceComponent;
 import org.wso2.carbon.core.multitenancy.GenericArtifactUnloader;
@@ -68,14 +66,9 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.security.CarbonJMXAuthenticator;
 import org.wso2.carbon.core.transports.CarbonServlet;
-import org.wso2.carbon.core.transports.TransportPersistenceManager;
 import org.wso2.carbon.core.util.HouseKeepingTask;
 import org.wso2.carbon.core.util.ParameterUtil;
 import org.wso2.carbon.core.util.Utils;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigItemHolder;
@@ -441,13 +434,13 @@ public final class CarbonServerManager implements Controllable {
             AxisConfiguration axisConfig = serverConfigContext.getAxisConfiguration();
             axisConfig.addParameter(enableHttp);
 
-            new TransportPersistenceManager(axisConfig).
-                    updateEnabledTransports(axisConfig.getTransportsIn().values(),
-                            axisConfig.getTransportsOut().values());
+//            new TransportPersistenceManager(axisConfig).
+//                    updateEnabledTransports(axisConfig.getTransportsIn().values(),
+//                            axisConfig.getTransportsOut().values());
 
             runInitializers();
 
-            populateConnectionProperties();
+//            populateConnectionProperties();
 
             serverConfigContext.setProperty(Constants.CONTAINER_MANAGED, "true");
             serverConfigContext.setProperty(ServerConstants.WORK_DIR, serverWorkDir);
@@ -497,14 +490,14 @@ public final class CarbonServerManager implements Controllable {
 
             log.info("Repository       : " + axis2RepoLocation);
 
-            if (CarbonUtils.useRegistryBasedRepository()) {
-                log.info("Using registry based repository");
-                UserRegistry userRegistry =
-                        CarbonCoreDataHolder.getInstance().getRegistryService().getLocalRepository();
-                RegistryBasedRepositoryUpdater.scheduleAtFixedRate(userRegistry,
-                        "/repository/deployment/server",
-                        axis2RepoLocation, 0, 10);
-            }
+//            if (CarbonUtils.useRegistryBasedRepository()) {
+//                log.info("Using registry based repository");
+//                UserRegistry userRegistry =
+//                        CarbonCoreDataHolder.getInstance().getRegistryService().getLocalRepository();
+//                RegistryBasedRepositoryUpdater.scheduleAtFixedRate(userRegistry,
+//                        "/repository/deployment/server",
+//                        axis2RepoLocation, 0, 10);
+//            }
 
             // schedule the services cleanup task
             if (GhostDeployerUtils.isGhostOn()) {
@@ -645,41 +638,41 @@ public final class CarbonServerManager implements Controllable {
     }
 
 
-
-    private void populateConnectionProperties() throws Exception {
-        RegistryService registryService = CarbonCoreDataHolder.getInstance().getRegistryService();
-        Registry registry = registryService.getConfigSystemRegistry();
-        String contextRoot = serverConfigContext.getContextRoot();
-        String servicePath = serverConfigContext.getServicePath();
-        String requestIP = org.apache.axis2.util.Utils
-                .getIpAddress(serverConfigContext.getAxisConfiguration());
-
-        Resource resource;
-        if (!registry.resourceExists(RegistryResources.CONNECTION_PROPS)) {
-            resource = registry.newResource();
-            resource.setProperty(SERVICE_PATH, servicePath);
-            resource.setProperty(BUNDLE_CONTEXT_ROOT, contextRoot);
-            resource.setProperty(HOST_NAME, requestIP);
-            registry.put(RegistryResources.CONNECTION_PROPS, resource);
-        } else {
-            resource = registry.get(RegistryResources.CONNECTION_PROPS);
-            // existing property values
-            String exServicePath = resource.getProperty(SERVICE_PATH);
-            String exContext = resource.getProperty(BUNDLE_CONTEXT_ROOT);
-            String exHost = resource.getProperty(HOST_NAME);
-
-            if (!(exServicePath != null && exServicePath.equals(servicePath) &&
-                    exContext != null && exContext.equals(contextRoot) &&
-                    exHost != null && exHost.equals(contextRoot))) {
-                resource.setProperty(SERVICE_PATH, servicePath);
-                resource.setProperty(BUNDLE_CONTEXT_ROOT, contextRoot);
-                resource.setProperty(HOST_NAME, requestIP);
-                // put the updated resource
-                registry.put(RegistryResources.CONNECTION_PROPS, resource);
-            }
-        }
-        resource.discard();
-    }
+//TODO check why these properties are set
+//    private void populateConnectionProperties() throws Exception {
+//        RegistryService registryService = CarbonCoreDataHolder.getInstance().getRegistryService();
+//        Registry registry = registryService.getConfigSystemRegistry();
+//        String contextRoot = serverConfigContext.getContextRoot();
+//        String servicePath = serverConfigContext.getServicePath();
+//        String requestIP = org.apache.axis2.util.Utils
+//                .getIpAddress(serverConfigContext.getAxisConfiguration());
+//
+//        Resource resource;
+//        if (!registry.resourceExists(RegistryResources.CONNECTION_PROPS)) {
+//            resource = registry.newResource();
+//            resource.setProperty(SERVICE_PATH, servicePath);
+//            resource.setProperty(BUNDLE_CONTEXT_ROOT, contextRoot);
+//            resource.setProperty(HOST_NAME, requestIP);
+//            registry.put(RegistryResources.CONNECTION_PROPS, resource);
+//        } else {
+//            resource = registry.get(RegistryResources.CONNECTION_PROPS);
+//            // existing property values
+//            String exServicePath = resource.getProperty(SERVICE_PATH);
+//            String exContext = resource.getProperty(BUNDLE_CONTEXT_ROOT);
+//            String exHost = resource.getProperty(HOST_NAME);
+//
+//            if (!(exServicePath != null && exServicePath.equals(servicePath) &&
+//                    exContext != null && exContext.equals(contextRoot) &&
+//                    exHost != null && exHost.equals(contextRoot))) {
+//                resource.setProperty(SERVICE_PATH, servicePath);
+//                resource.setProperty(BUNDLE_CONTEXT_ROOT, contextRoot);
+//                resource.setProperty(HOST_NAME, requestIP);
+//                // put the updated resource
+//                registry.put(RegistryResources.CONNECTION_PROPS, resource);
+//            }
+//        }
+//        resource.discard();
+//    }
     // remove this method as this ListenerManager will destroy by CarbonCoreServiceComponent deactivate method.
 //    public void stopListenerManager() throws AxisFault {
 //        try {
@@ -965,9 +958,9 @@ public final class CarbonServerManager implements Controllable {
         this.shutdownHook = null;
         CarbonConfigurationContextFactory.clear();
         multitenantServerManager.cleanup();
-        if (CarbonUtils.useRegistryBasedRepository()) {
-            RegistryBasedRepositoryUpdater.cleanup();
-        }
+//        if (CarbonUtils.useRegistryBasedRepository()) {
+//            RegistryBasedRepositoryUpdater.cleanup();
+//        }
         if (serverConfigContext != null) {
             serverConfigContext.removeProperty(ServerConstants.CARBON_INSTANCE);
             serverConfigContext.removeProperty(WSO2Constants.PRIMARY_BUNDLE_CONTEXT);

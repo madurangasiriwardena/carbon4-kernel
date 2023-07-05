@@ -23,12 +23,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -107,23 +103,23 @@ public abstract class AbstractAdmin {
         this.axisConfig = configurationContext.getAxisConfiguration();
     }
 
-    /**
-     * @deprecated
-     * @return config registry
-     */
-    protected Registry getRegistry() {
-        return getConfigSystemRegistry();
-    }
+//    /**
+//     * @deprecated
+//     * @return config registry
+//     */
+//    protected Registry getRegistry() {
+//        return getConfigSystemRegistry();
+//    }
 
-    protected Registry getConfigSystemRegistry() {
-        return (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                getRegistry(RegistryType.SYSTEM_CONFIGURATION);
-    }
-
-    protected Registry getConfigUserRegistry() {
-        return (Registry) CarbonContext.getThreadLocalCarbonContext().getRegistry(
-                RegistryType.USER_CONFIGURATION);
-    }
+//    protected Registry getConfigSystemRegistry() {
+//        return (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext().
+//                getRegistry(RegistryType.SYSTEM_CONFIGURATION);
+//    }
+//
+//    protected Registry getConfigUserRegistry() {
+//        return (Registry) CarbonContext.getThreadLocalCarbonContext().getRegistry(
+//                RegistryType.USER_CONFIGURATION);
+//    }
 
     protected UserRealm getUserRealm() {
         return (UserRealm) CarbonContext.getThreadLocalCarbonContext().getUserRealm();
@@ -137,28 +133,28 @@ public abstract class AbstractAdmin {
         return (String) CarbonContext.getThreadLocalCarbonContext().getUserId();
     }
 
-    protected Registry getLocalRepo() {
-        return (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext().getRegistry(
-                RegistryType.LOCAL_REPOSITORY);
-    }
+//    protected Registry getLocalRepo() {
+//        return (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext().getRegistry(
+//                RegistryType.LOCAL_REPOSITORY);
+//    }
 
     /**
      * @deprecated Use either getGovernanceSystemRegistry or getGovernanceUserRegistry
      * @return Governance User Registry
      */
-    @Deprecated protected Registry getGovernanceRegistry() {
-        return getGovernanceUserRegistry();
-    }
-
-    protected Registry getGovernanceUserRegistry() {
-        return (Registry) CarbonContext.getThreadLocalCarbonContext().getRegistry(
-                RegistryType.USER_GOVERNANCE);
-    }
-
-    protected Registry getGovernanceSystemRegistry() {
-        return (Registry) CarbonContext.getThreadLocalCarbonContext().getRegistry(
-                RegistryType.SYSTEM_GOVERNANCE);
-    }
+//    @Deprecated protected Registry getGovernanceRegistry() {
+//        return getGovernanceUserRegistry();
+//    }
+//
+//    protected Registry getGovernanceUserRegistry() {
+//        return (Registry) CarbonContext.getThreadLocalCarbonContext().getRegistry(
+//                RegistryType.USER_GOVERNANCE);
+//    }
+//
+//    protected Registry getGovernanceSystemRegistry() {
+//        return (Registry) CarbonContext.getThreadLocalCarbonContext().getRegistry(
+//                RegistryType.SYSTEM_GOVERNANCE);
+//    }
 
     protected HttpSession getHttpSession() {
         checkAdminService();
@@ -172,13 +168,13 @@ public abstract class AbstractAdmin {
         return httpSession;
     }
 
-    protected void setPermissionUpdateTimestamp() throws RegistryException {
-        checkAdminService();
-        Registry registry = getGovernanceSystemRegistry();
-        Resource resource = registry.newResource();
-        resource.setProperty("timestamp", Long.toString(System.currentTimeMillis()));
-        registry.put("/repository/components/org.wso2.carbon.user.mgt/updatedTime", resource);
-    }
+//    protected void setPermissionUpdateTimestamp() throws RegistryException {
+//        checkAdminService();
+//        Registry registry = getGovernanceSystemRegistry();
+//        Resource resource = registry.newResource();
+//        resource.setProperty("timestamp", Long.toString(System.currentTimeMillis()));
+//        registry.put("/repository/components/org.wso2.carbon.user.mgt/updatedTime", resource);
+//    }
 
     private void checkAdminService() {
         MessageContext msgCtx = MessageContext.getCurrentMessageContext();

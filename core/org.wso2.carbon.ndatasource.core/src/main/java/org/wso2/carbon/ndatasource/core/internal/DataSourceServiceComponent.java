@@ -31,7 +31,6 @@ import org.wso2.carbon.ndatasource.core.DataSourceAxis2ConfigurationContextObser
 import org.wso2.carbon.ndatasource.core.DataSourceManager;
 import org.wso2.carbon.ndatasource.core.DataSourceRepository;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.securevault.SecretCallbackHandlerService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
@@ -47,7 +46,7 @@ public class DataSourceServiceComponent {
 
     private static final String DATA_SOURCE_REPO_CLASS_TAG = "CarbonDataSourceRepositoryClass";
 	
-	private static RegistryService registryService;
+//	private static RegistryService registryService;
 
 	private static ExternalCryptoProvider externalCryptoProvider;
 	
@@ -141,23 +140,23 @@ public class DataSourceServiceComponent {
     	return DataSourceServiceComponent.realmService;
     }
 
-    @Reference(name = "registry.service", cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, 
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-    	if (log.isDebugEnabled()) {
-    		log.debug("RegistryService acquired");
-    	}
-    	DataSourceServiceComponent.registryService = registryService;
-    	this.checkInitTenantUserDataSources();
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-        registryService = null;
-    }
-
-    public static RegistryService getRegistryService() {
-        return DataSourceServiceComponent.registryService;
-    }
+//    @Reference(name = "registry.service", cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRegistryService")
+//    protected void setRegistryService(RegistryService registryService) {
+//    	if (log.isDebugEnabled()) {
+//    		log.debug("RegistryService acquired");
+//    	}
+//    	DataSourceServiceComponent.registryService = registryService;
+//    	this.checkInitTenantUserDataSources();
+//    }
+//
+//    protected void unsetRegistryService(RegistryService registryService) {
+//        registryService = null;
+//    }
+//
+//    public static RegistryService getRegistryService() {
+//        return DataSourceServiceComponent.registryService;
+//    }
 
     @Reference(name = "external.crypto.service", cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, 
             unbind = "unsetExternalCryptoProvider")
@@ -213,8 +212,7 @@ public class DataSourceServiceComponent {
     }
     
     private synchronized void checkInitTenantUserDataSources() {
-    	if (DataSourceServiceComponent.getRealmService() != null && 
-    			DataSourceServiceComponent.getRegistryService() != null &&
+    	if (DataSourceServiceComponent.getRealmService() != null &&
     			DataSourceServiceComponent.getSecretCallbackHandlerService() != null && 
     			DataSourceServiceComponent.getServerConfigurationService() != null &&
 			DataSourceServiceComponent.getExternalCryptoProvider() != null) {
@@ -227,7 +225,7 @@ public class DataSourceServiceComponent {
     		if (log.isDebugEnabled()) {
         		log.debug("Initializing super tenant user data sources...");
         	}
-    		DataSourceManager.getInstance().initTenant(MultitenantConstants.SUPER_TENANT_ID);
+//    		DataSourceManager.getInstance().initTenant(MultitenantConstants.SUPER_TENANT_ID);
     	    if (log.isDebugEnabled()) {
     	    	log.debug("Super tenant user data sources successfully initialized");
     	    }

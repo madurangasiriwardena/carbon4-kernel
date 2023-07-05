@@ -18,7 +18,7 @@
 <%@ page import="java.util.Locale" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
-<%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
+<%--<%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>--%>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Iterator" %>
@@ -57,7 +57,8 @@
         if ("true".equals(ServerConfiguration.getInstance().getFirstProperty(CarbonConstants.IS_CLOUD_DEPLOYMENT))) {
             String themeRoot = "../../../../t/" + tenantDomain
                     + "/registry/resource"
-                    + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
+                    + "/_system/governance"
+//                    + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
                     + "/repository";
             mainCSS = themeRoot + "/theme/admin/main.css";
         } else {
@@ -73,7 +74,8 @@
     } else {
         if ("true".equals(ServerConfiguration.getInstance().getFirstProperty(CarbonConstants.IS_CLOUD_DEPLOYMENT))) {
             mainCSS = "../../registry/resource"
-                      + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
+//                      + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
+                      + "/_system/governance"
                       + "/repository/components/org.wso2.carbon.all-themes/Default/admin/main.css";
         } else {
             mainCSS = "../styles/css/main.css";

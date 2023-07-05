@@ -26,7 +26,6 @@ import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.common.LoggedUserInfo;
 import org.wso2.carbon.core.services.authentication.AuthenticationAdmin;
 import org.wso2.carbon.core.services.util.CarbonAuthenticationUtil;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.AuthorizationManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.utils.ServerConstants;
@@ -81,8 +80,9 @@ public class LoggedUserInfoAdmin extends AbstractAdmin {
 
     private List<String> getUserPermissions(String username, UserRealm realm) throws Exception {
         AuthorizationManager authManager = realm.getAuthorizationManager();
-        String[] permissions = authManager.getAllowedUIResourcesForUser(username, RegistryUtils
-                .getUnChrootedPath("/"));
+//        String[] permissions = authManager.getAllowedUIResourcesForUser(username, RegistryUtils
+//                .getUnChrootedPath("/"));
+        String[] permissions = authManager.getAllowedUIResourcesForUser(username, "/");
         List<String> userPermissions = Arrays.asList(permissions);
         return userPermissions;
     }

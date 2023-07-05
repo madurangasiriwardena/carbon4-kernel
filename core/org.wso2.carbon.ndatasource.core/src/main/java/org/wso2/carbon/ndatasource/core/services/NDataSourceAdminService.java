@@ -65,7 +65,7 @@ public class NDataSourceAdminService extends AbstractAdmin {
 	}
 	
 	public boolean reloadAllDataSources() throws DataSourceException {
-		DataSourceManager.getInstance().getDataSourceRepository().refreshAllUserDataSources();
+//		DataSourceManager.getInstance().getDataSourceRepository().refreshAllUserDataSources();
 		return true;
 	}
 	

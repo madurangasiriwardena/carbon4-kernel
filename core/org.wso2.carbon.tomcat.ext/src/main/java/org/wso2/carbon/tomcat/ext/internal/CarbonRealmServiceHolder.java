@@ -18,7 +18,6 @@
 package org.wso2.carbon.tomcat.ext.internal;
 
 
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**
@@ -26,7 +25,7 @@ import org.wso2.carbon.user.core.service.RealmService;
  */
 public class CarbonRealmServiceHolder {
     private static RealmService userRealmService;
-    private static RegistryService registryService;
+//    private static RegistryService registryService;
 
     public static RealmService getRealmService() {
         return userRealmService;
@@ -36,12 +35,12 @@ public class CarbonRealmServiceHolder {
         CarbonRealmServiceHolder.userRealmService = userRealmService;
     }
 
-    public static RegistryService getRegistryService() {
-        return registryService;
-    }
-
-    public static void setRegistryService(RegistryService registryService) {
-        CarbonRealmServiceHolder.registryService = registryService;
-    }
+//    public static RegistryService getRegistryService() {
+//        return registryService;
+//    }
+//
+//    public static void setRegistryService(RegistryService registryService) {
+//        CarbonRealmServiceHolder.registryService = registryService;
+//    }
 
 }

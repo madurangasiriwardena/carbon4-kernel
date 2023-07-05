@@ -37,8 +37,6 @@ import org.wso2.carbon.ndatasource.common.DataSourceConstants;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.DataSourceMetaInfo;
 import org.wso2.carbon.ndatasource.core.internal.DataSourceServiceComponent;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
@@ -104,41 +102,41 @@ public class DataSourceUtils {
     	return dataSourceId.get();
     }
 
-	public static Registry getConfRegistryForTenant(int tenantId) throws DataSourceException {
-		try {
-			/* be super tenant to retrieve the registry of a given tenant id */
-			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
-					MultitenantConstants.SUPER_TENANT_ID);
-			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-					MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-			return DataSourceServiceComponent.getRegistryService().getConfigSystemRegistry(
-					tenantId);
-		} catch (RegistryException e) {
-			throw new DataSourceException("Error in retrieving conf registry instance: " +
-		            e.getMessage(), e);
-		} finally {
-			/* go out of being super tenant */
-			PrivilegedCarbonContext.endTenantFlow();
-		}
-	}
-
-	public static Registry getGovRegistryForTenant(int tenantId) throws DataSourceException {
-		try {
-			/* be super tenant to retrieve the registry of a given tenant id */
-			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
-                    MultitenantConstants.SUPER_TENANT_ID);
-			return DataSourceServiceComponent.getRegistryService().getGovernanceSystemRegistry(
-                    tenantId);
-		} catch (RegistryException e) {
-			throw new DataSourceException("Error in retrieving gov registry instance: " +
-		            e.getMessage(), e);
-		} finally {
-			/* go out of being super tenant */
-			PrivilegedCarbonContext.endTenantFlow();
-		}
-	}
+//	public static Registry getConfRegistryForTenant(int tenantId) throws DataSourceException {
+//		try {
+//			/* be super tenant to retrieve the registry of a given tenant id */
+//			PrivilegedCarbonContext.startTenantFlow();
+//			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+//					MultitenantConstants.SUPER_TENANT_ID);
+//			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+//					MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+//			return DataSourceServiceComponent.getRegistryService().getConfigSystemRegistry(
+//					tenantId);
+//		} catch (RegistryException e) {
+//			throw new DataSourceException("Error in retrieving conf registry instance: " +
+//		            e.getMessage(), e);
+//		} finally {
+//			/* go out of being super tenant */
+//			PrivilegedCarbonContext.endTenantFlow();
+//		}
+//	}
+//
+//	public static Registry getGovRegistryForTenant(int tenantId) throws DataSourceException {
+//		try {
+//			/* be super tenant to retrieve the registry of a given tenant id */
+//			PrivilegedCarbonContext.startTenantFlow();
+//			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+//                    MultitenantConstants.SUPER_TENANT_ID);
+//			return DataSourceServiceComponent.getRegistryService().getGovernanceSystemRegistry(
+//                    tenantId);
+//		} catch (RegistryException e) {
+//			throw new DataSourceException("Error in retrieving gov registry instance: " +
+//		            e.getMessage(), e);
+//		} finally {
+//			/* go out of being super tenant */
+//			PrivilegedCarbonContext.endTenantFlow();
+//		}
+//	}
 
 	public static boolean nullAllowEquals(Object lhs, Object rhs) {
 		if (lhs == null && rhs == null) {
@@ -207,8 +205,7 @@ public class DataSourceUtils {
 			    boolean encrypted = Boolean.parseBoolean(encryptedStr);
 			    if (encrypted) {
 				    element.setTextContent(new String(CryptoUtil.getDefaultCryptoUtil(
-				    		DataSourceServiceComponent.getServerConfigurationService(),
-				    		DataSourceServiceComponent.getRegistryService()).
+				    		DataSourceServiceComponent.getServerConfigurationService()).
 				    		base64DecodeAndDecrypt(element.getTextContent())));
 			    }
 		    }
@@ -246,8 +243,7 @@ public class DataSourceUtils {
 				boolean encrypted = Boolean.parseBoolean(encryptedStr);
 				if (encrypted) {
 					element.setText(new String(CryptoUtil.getDefaultCryptoUtil(
-							DataSourceServiceComponent.getServerConfigurationService(),
-							DataSourceServiceComponent.getRegistryService()).
+							DataSourceServiceComponent.getServerConfigurationService()).
 							base64DecodeAndDecrypt(element.getText())));
 				}
 			}
@@ -265,8 +261,7 @@ public class DataSourceUtils {
 		    boolean encrypted = Boolean.parseBoolean(encryptedStr);
 		    if (encrypted) {
 			    element.setTextContent(CryptoUtil.getDefaultCryptoUtil(
-			    		DataSourceServiceComponent.getServerConfigurationService(),
-			    		DataSourceServiceComponent.getRegistryService()).
+			    		DataSourceServiceComponent.getServerConfigurationService()).
 			    		encryptAndBase64Encode(element.getTextContent().getBytes()));
 		    }
 		}

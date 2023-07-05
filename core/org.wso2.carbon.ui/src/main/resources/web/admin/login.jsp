@@ -19,8 +19,8 @@
 <%@page import="org.apache.axis2.context.ConfigurationContext"%>
 <%@page import="org.wso2.carbon.utils.CarbonUtils"%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
-<%@ page import="org.wso2.carbon.admin.advisory.mgt.stub.dto.AdminAdvisoryBannerDTO"%>
-<%@ page import="org.wso2.carbon.admin.advisory.mgt.ui.AdminAdvisoryBannerClient"%>
+<%--<%@ page import="org.wso2.carbon.admin.advisory.mgt.stub.dto.AdminAdvisoryBannerDTO"%>--%>
+<%--<%@ page import="org.wso2.carbon.admin.advisory.mgt.ui.AdminAdvisoryBannerClient"%>--%>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
@@ -34,19 +34,19 @@
 <%!
     private Log log = LogFactory.getLog(this.getClass());
 %>
-<%!
-    private AdminAdvisoryBannerDTO getAdminBannerConfig(String backendServerURL, ConfigurationContext configContext) {
+<%--<%!--%>
+<%--    private AdminAdvisoryBannerDTO getAdminBannerConfig(String backendServerURL, ConfigurationContext configContext) {--%>
 
-        AdminAdvisoryBannerDTO adminAdvisoryBannerConfig = new AdminAdvisoryBannerDTO();
-        try {
-            AdminAdvisoryBannerClient client = new AdminAdvisoryBannerClient(backendServerURL, configContext);
-            adminAdvisoryBannerConfig = client.loadBannerConfig();
-        } catch (Exception e) {
-            log.error("Error in displaying admin advisory banner", e);
-        }
-        return adminAdvisoryBannerConfig;
-    }
-%>
+<%--        AdminAdvisoryBannerDTO adminAdvisoryBannerConfig = new AdminAdvisoryBannerDTO();--%>
+<%--        try {--%>
+<%--            AdminAdvisoryBannerClient client = new AdminAdvisoryBannerClient(backendServerURL, configContext);--%>
+<%--            adminAdvisoryBannerConfig = client.loadBannerConfig();--%>
+<%--        } catch (Exception e) {--%>
+<%--            log.error("Error in displaying admin advisory banner", e);--%>
+<%--        }--%>
+<%--        return adminAdvisoryBannerConfig;--%>
+<%--    }--%>
+<%--%>--%>
 <%
 String userForumURL =
         (String) config.getServletContext().getAttribute(CarbonConstants.PRODUCT_XML_WSO2CARBON +
@@ -80,9 +80,9 @@ if (CharacterEncoder.getSafeText(request.getParameter("skipLoginPage"))!=null){
 String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
 ConfigurationContext configContext = (ConfigurationContext) config.getServletContext()
     .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-AdminAdvisoryBannerDTO adminConfig = getAdminBannerConfig(backendServerURL, configContext);
-Boolean enableBanner = adminConfig.getEnableBanner();
-String bannerContent = adminConfig.getBannerContent();
+//AdminAdvisoryBannerDTO adminConfig = getAdminBannerConfig(backendServerURL, configContext);
+//Boolean enableBanner = adminConfig.getEnableBanner();
+//String bannerContent = adminConfig.getBannerContent();
 %>
 
 <fmt:bundle basename="org.wso2.carbon.i18n.Resources">
@@ -223,15 +223,15 @@ String bannerContent = adminConfig.getBannerContent();
 
                         <form action='../admin/login_action.jsp' method="POST" onsubmit="return doValidation();" target="_self" onsubmit="checkInputs()">
                             <table>
-                                <%if (enableBanner) { %>
-                                <tr>
-                                    <td colspan="2">
-                                        <div style='background-color: #fff5e8; text-align: justify; padding: 10px'>
-                                            <%=Encode.forHtmlAttribute(bannerContent)%>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <% } %>
+<%--                                <%if (enableBanner) { %>--%>
+<%--                                <tr>--%>
+<%--                                    <td colspan="2">--%>
+<%--                                        <div style='background-color: #fff5e8; text-align: justify; padding: 10px'>--%>
+<%--                                            <%=Encode.forHtmlAttribute(bannerContent)%>--%>
+<%--                                        </div>--%>
+<%--                                    </td>--%>
+<%--                                </tr>--%>
+<%--                                <% } %>--%>
                                  <%if(!CarbonUtils.isRunningOnLocalTransportMode()) { %>
                                 <tr>
                                     <td>

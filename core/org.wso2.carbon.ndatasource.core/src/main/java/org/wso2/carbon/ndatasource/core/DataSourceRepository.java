@@ -29,11 +29,6 @@ import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.common.spi.DataSourceReader;
 import org.wso2.carbon.ndatasource.core.internal.DataSourceServiceComponent;
 import org.wso2.carbon.ndatasource.core.utils.DataSourceUtils;
-import org.wso2.carbon.registry.api.Collection;
-import org.wso2.carbon.registry.api.Resource;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.io.InputStream;
@@ -56,7 +51,7 @@ public class DataSourceRepository {
 	
 	private int tenantId;
 	
-	private Registry registry;
+//	private Registry registry;
 	
 	private Map<String, CarbonDataSource> dataSources;
 	
@@ -87,62 +82,62 @@ public class DataSourceRepository {
 	 * called after the registry service is available to be used.
 	 * @throws DataSourceException
 	 */
-	public void initRepository() throws DataSourceException {
-		this.refreshAllUserDataSources();
-	}
+//	public void initRepository() throws DataSourceException {
+//		this.refreshAllUserDataSources();
+//	}
 	
-	private synchronized Registry getRegistry() throws DataSourceException {
-		if (this.registry == null) {
-		    this.registry = DataSourceUtils.getConfRegistryForTenant(this.getTenantId());
-		    if (log.isDebugEnabled()) {
-		        log.debug("[datasources] Retrieving the governance registry for tenant: " +
-		                this.getTenantId());
-		    }
-		}
-		return registry;
-	}
+//	private synchronized Registry getRegistry() throws DataSourceException {
+//		if (this.registry == null) {
+//		    this.registry = DataSourceUtils.getConfRegistryForTenant(this.getTenantId());
+//		    if (log.isDebugEnabled()) {
+//		        log.debug("[datasources] Retrieving the governance registry for tenant: " +
+//		                this.getTenantId());
+//		    }
+//		}
+//		return registry;
+//	}
 	
-	private String resourceNameFromPath(String path) {
-		return path.substring(path.lastIndexOf('/') + 1);
-	}
+//	private String resourceNameFromPath(String path) {
+//		return path.substring(path.lastIndexOf('/') + 1);
+//	}
 	
 	/**
 	 * Reloads all the data sources from the repository.
 	 * @throws DataSourceException
 	 */
-	public void refreshAllUserDataSources() throws DataSourceException {
-		this.updateAllUserDataSource(false);
-	}
+//	public void refreshAllUserDataSources() throws DataSourceException {
+//		this.updateAllUserDataSource(false);
+//	}
 	
 	/**
 	 * Unregisters all the data sources from the repository.
 	 * @throws DataSourceException
 	 */
-	public void unregisterAllUserDataSources() throws DataSourceException {
-		this.updateAllUserDataSource(true);
-	}
+//	public void unregisterAllUserDataSources() throws DataSourceException {
+//		this.updateAllUserDataSource(true);
+//	}
 	
-	private void updateAllUserDataSource(boolean unregister) throws DataSourceException {
-		try {
-			if (this.getRegistry().resourceExists(
-					DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH)) {
-				Collection dsCollection = (Collection) this.getRegistry().get(
-						DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH);
-				String[] dsmPaths = dsCollection.getChildren();
-				for (String dsmPath : dsmPaths) {
-					try {
-					    this.updateDataSource(this.resourceNameFromPath(dsmPath), unregister);
-					} catch (DataSourceException e) {
-						log.error("Error in updating data source [remove:" + unregister +
-								"] at path '" + dsmPath + "': " + e.getMessage(), e);
-					}
-				}
-			}
-		} catch (Exception e) {
-			throw new DataSourceException(
-					"Error in getting all data sources from repository: " + e.getMessage(), e);
-		}
-	}
+//	private void updateAllUserDataSource(boolean unregister) throws DataSourceException {
+//		try {
+//			if (this.getRegistry().resourceExists(
+//					DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH)) {
+//				Collection dsCollection = (Collection) this.getRegistry().get(
+//						DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH);
+//				String[] dsmPaths = dsCollection.getChildren();
+//				for (String dsmPath : dsmPaths) {
+//					try {
+//					    this.updateDataSource(this.resourceNameFromPath(dsmPath), unregister);
+//					} catch (DataSourceException e) {
+//						log.error("Error in updating data source [remove:" + unregister +
+//								"] at path '" + dsmPath + "': " + e.getMessage(), e);
+//					}
+//				}
+//			}
+//		} catch (Exception e) {
+//			throw new DataSourceException(
+//					"Error in getting all data sources from repository: " + e.getMessage(), e);
+//		}
+//	}
 	
 	/**
 	 * Reloads only a specific given data source.
@@ -158,9 +153,9 @@ public class DataSourceRepository {
 	
 	private synchronized void updateDataSource(String dsName, 
 			boolean unregister) throws DataSourceException {
-		String dsmPath = DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH + "/" + dsName;
+//		String dsmPath = DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH + "/" + dsName;
 		try {
-			DataSourceMetaInfo dsmInfo = this.getDataSourceMetaInfoFromRegistryPath(dsmPath);
+//			DataSourceMetaInfo dsmInfo = this.getDataSourceMetaInfoFromRegistryPath(dsmPath);
 			CarbonDataSource currentCDS = this.getDataSource(dsName);
 			DataSourceMetaInfo currentDsmInfo = null;
 			if (currentCDS != null) {
@@ -168,18 +163,18 @@ public class DataSourceRepository {
 			}
 			if (unregister) {
 				this.unregisterDataSource(dsName);
-			} else {
-				if (DataSourceUtils.nullAllowEquals(dsmInfo, currentDsmInfo)) {
-					if (log.isDebugEnabled()) {
-						log.debug("No update change for data source: " + dsName);
-					}
-					return;
-				}
-				if (dsmInfo != null) {
-					this.registerDataSource(dsmInfo);
-				} else {
-					this.unregisterDataSource(dsName);
-				}
+//			} else {
+//				if (DataSourceUtils.nullAllowEquals(dsmInfo, currentDsmInfo)) {
+//					if (log.isDebugEnabled()) {
+//						log.debug("No update change for data source: " + dsName);
+//					}
+//					return;
+//				}
+//				if (dsmInfo != null) {
+//					this.registerDataSource(dsmInfo);
+//				} else {
+//					this.unregisterDataSource(dsName);
+//				}
 			}
 		} catch (Exception e) {
 			throw new DataSourceException("Error in updating data source '" + dsName + 
@@ -286,41 +281,41 @@ public class DataSourceRepository {
 		}
 	}
 	
-	private void removePersistedDataSource(String dsName) throws DataSourceException {
-		try {
-			this.getRegistry().beginTransaction();
-			String path = DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH + "/" + dsName;
-			if (this.getRegistry().resourceExists(path)) {
-		        this.getRegistry().delete(path);
-			}
-		    this.getRegistry().commitTransaction();
-		} catch (Exception e) {
-			try {
-				this.getRegistry().rollbackTransaction();
-			} catch (RegistryException e1) {
-				log.error("Error in rollback transaction in removing data source:" + 
-			            e1.getMessage(), e1);
-			}
-			throw new DataSourceException("Error in removing data source: " + dsName + 
-					" - " + e.getMessage(), e);
-		}
-	}
+//	private void removePersistedDataSource(String dsName) throws DataSourceException {
+//		try {
+//			this.getRegistry().beginTransaction();
+//			String path = DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH + "/" + dsName;
+//			if (this.getRegistry().resourceExists(path)) {
+//		        this.getRegistry().delete(path);
+//			}
+//		    this.getRegistry().commitTransaction();
+//		} catch (Exception e) {
+//			try {
+//				this.getRegistry().rollbackTransaction();
+//			} catch (RegistryException e1) {
+//				log.error("Error in rollback transaction in removing data source:" +
+//			            e1.getMessage(), e1);
+//			}
+//			throw new DataSourceException("Error in removing data source: " + dsName +
+//					" - " + e.getMessage(), e);
+//		}
+//	}
 	
-	private void persistDataSource(DataSourceMetaInfo dsmInfo) throws DataSourceException {
-		try {
-			Element element = DataSourceUtils.
-					convertDataSourceMetaInfoToElement(dsmInfo, this.getDSMMarshaller());
-			DataSourceUtils.secureSaveElement(element);
-			
-			Resource resource = this.getRegistry().newResource();
-			resource.setContentStream(DataSourceUtils.elementToInputStream(element));
-			this.getRegistry().put(DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH + "/" +
-			        dsmInfo.getName(), resource);
-		} catch (Exception e) {
-			throw new DataSourceException("Error in persisting data source: " + 
-		            dsmInfo.getName() + " - " + e.getMessage(), e);
-		}
-	}
+//	private void persistDataSource(DataSourceMetaInfo dsmInfo) throws DataSourceException {
+//		try {
+//			Element element = DataSourceUtils.
+//					convertDataSourceMetaInfoToElement(dsmInfo, this.getDSMMarshaller());
+//			DataSourceUtils.secureSaveElement(element);
+//
+//			Resource resource = this.getRegistry().newResource();
+//			resource.setContentStream(DataSourceUtils.elementToInputStream(element));
+//			this.getRegistry().put(DataSourceConstants.DATASOURCES_REPOSITORY_BASE_PATH + "/" +
+//			        dsmInfo.getName(), resource);
+//		} catch (Exception e) {
+//			throw new DataSourceException("Error in persisting data source: " +
+//		            dsmInfo.getName() + " - " + e.getMessage(), e);
+//		}
+//	}
 	
 	private void unregisterDataSource(String dsName) {
 		CarbonDataSource cds = this.getDataSource(dsName);
@@ -399,41 +394,41 @@ public class DataSourceRepository {
 		}
 	}
 	
-	private DataSourceMetaInfo getDataSourceMetaInfoFromRegistryPath(String path)
-			throws DataSourceException, Exception {
-        InputStream in = null;
-		try {
-		    this.getRegistry().beginTransaction();
-            if (this.getRegistry().resourceExists(path)) {
-			    Resource resource;
-			    try {
-			    	resource = this.getRegistry().get(path);
-			    } catch (ResourceNotFoundException e) {
-			    	/* this step is as a precaution, because sometimes even though the
-			    	 * resource is deleted, "resourceExists" returns true */
-					return null;
-				}
-			    in = resource.getContentStream();
-                OMElement doc = DataSourceUtils.convertToOMElement(in);
-                /* only super tenant will lookup secure vault information for system data sources,
-			     * others are not allowed to */
-                DataSourceUtils.secureResolveOMElement(doc, false);
-
-                this.getRegistry().commitTransaction();
-                doc.toStringWithConsume();
-			    return (DataSourceMetaInfo) this.getDSMUnmarshaller().unmarshal(doc.getXMLStreamReader());
-		    } else {
-			    return null;
-		    }
-		} catch (Exception e) {
-			this.getRegistry().rollbackTransaction();
-			throw e;
-		} finally {
-            if (in != null) {
-                in.close();
-            }
-        }
-	}
+//	private DataSourceMetaInfo getDataSourceMetaInfoFromRegistryPath(String path)
+//			throws DataSourceException, Exception {
+//        InputStream in = null;
+//		try {
+//		    this.getRegistry().beginTransaction();
+//            if (this.getRegistry().resourceExists(path)) {
+//			    Resource resource;
+//			    try {
+//			    	resource = this.getRegistry().get(path);
+//			    } catch (ResourceNotFoundException e) {
+//			    	/* this step is as a precaution, because sometimes even though the
+//			    	 * resource is deleted, "resourceExists" returns true */
+//					return null;
+//				}
+//			    in = resource.getContentStream();
+//                OMElement doc = DataSourceUtils.convertToOMElement(in);
+//                /* only super tenant will lookup secure vault information for system data sources,
+//			     * others are not allowed to */
+//                DataSourceUtils.secureResolveOMElement(doc, false);
+//
+//                this.getRegistry().commitTransaction();
+//                doc.toStringWithConsume();
+//			    return (DataSourceMetaInfo) this.getDSMUnmarshaller().unmarshal(doc.getXMLStreamReader());
+//		    } else {
+//			    return null;
+//		    }
+//		} catch (Exception e) {
+//			this.getRegistry().rollbackTransaction();
+//			throw e;
+//		} finally {
+//            if (in != null) {
+//                in.close();
+//            }
+//        }
+//	}
 	
 	private Unmarshaller getDSMUnmarshaller() {
 		return dsmUnmarshaller;
@@ -468,9 +463,9 @@ public class DataSourceRepository {
 		if (log.isDebugEnabled()) {
 			log.debug("Adding data source: " + dsmInfo.getName());
 		}
-        if (dsmInfo.isPersistable()) {
-		    this.persistDataSource(dsmInfo);
-		}
+//        if (dsmInfo.isPersistable()) {
+//		    this.persistDataSource(dsmInfo);
+//		}
 		this.registerDataSource(dsmInfo);
         if (dsmInfo.isPersistable()) {
 		    this.notifyClusterDSChange(dsmInfo.getName());
@@ -494,7 +489,7 @@ public class DataSourceRepository {
 		}
         this.unregisterDataSource(dsName);
         if (cds.getDSMInfo().isPersistable()) {
-            this.removePersistedDataSource(dsName);
+//            this.removePersistedDataSource(dsName);
             this.notifyClusterDSChange(dsName);
         }
 	}

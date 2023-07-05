@@ -25,7 +25,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 @Component(name = "tomcat.ext.service.comp", immediate = true)
@@ -48,21 +47,21 @@ public class CarbonRealmServiceComponent {
         }
     }
 
-    @Reference(name = "registry.service.provider", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, 
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-        CarbonRealmServiceHolder.setRegistryService(registryService);
-        if (log.isDebugEnabled()) {
-            log.debug(registryService + "is being set");
-        }
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-        CarbonRealmServiceHolder.setRegistryService(null);
-        if (log.isDebugEnabled()) {
-            log.debug(registryService + "is being unset");
-        }
-    }
+//    @Reference(name = "registry.service.provider", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRegistryService")
+//    protected void setRegistryService(RegistryService registryService) {
+//        CarbonRealmServiceHolder.setRegistryService(registryService);
+//        if (log.isDebugEnabled()) {
+//            log.debug(registryService + "is being set");
+//        }
+//    }
+//
+//    protected void unsetRegistryService(RegistryService registryService) {
+//        CarbonRealmServiceHolder.setRegistryService(null);
+//        if (log.isDebugEnabled()) {
+//            log.debug(registryService + "is being unset");
+//        }
+//    }
 
 }
 

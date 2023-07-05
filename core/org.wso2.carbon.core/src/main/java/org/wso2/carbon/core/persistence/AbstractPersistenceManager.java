@@ -36,17 +36,11 @@ import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.jaxen.JaxenException;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.Resources;
 import org.wso2.carbon.core.persistence.file.AbstractFilePersistenceManager;
 import org.wso2.carbon.core.persistence.file.ModuleFilePersistenceManager;
 import org.wso2.carbon.core.persistence.file.ServiceGroupFilePersistenceManager;
 import org.wso2.carbon.core.util.ParameterUtil;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -74,10 +68,10 @@ public abstract class AbstractPersistenceManager {
     // TODO: See whether a cluster-wide lock needs to be created in here - Senaka.
     protected static final Object WRITE_LOCK = new Object();
 
-    /**
-     * The Configuration registry instance in which all configuration data are stored.
-     */
-    protected Registry configRegistry;
+//    /**
+//     * The Configuration registry instance in which all configuration data are stored.
+//     */
+//    protected Registry configRegistry;
 
     protected AxisConfiguration axisConfig;
 
@@ -102,16 +96,16 @@ public abstract class AbstractPersistenceManager {
         this.axisConfig = axisConfig;
         this.pf = pf;
         this.fpm = fpm;
-        try {
-            configRegistry =
-                    (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext().  //needed for TransportPM
-                            getRegistry(RegistryType.SYSTEM_CONFIGURATION);
-        } catch (Exception e) {
-            log.error("Error while retrieving config registry from Axis configuration", e);
-        }
-        if (configRegistry == null) {
-            throw new AxisFault("Configuration Registry is not available");
-        }
+//        try {
+//            configRegistry =
+//                    (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext().  //needed for TransportPM
+//                            getRegistry(RegistryType.SYSTEM_CONFIGURATION);
+//        } catch (Exception e) {
+//            log.error("Error while retrieving config registry from Axis configuration", e);
+//        }
+//        if (configRegistry == null) {
+//            throw new AxisFault("Configuration Registry is not available");
+//        }
     }
 
     /**
@@ -122,16 +116,16 @@ public abstract class AbstractPersistenceManager {
      */
     protected AbstractPersistenceManager(AxisConfiguration axisConfig) throws AxisFault {
         this.axisConfig = axisConfig;
-        try {
-            configRegistry =
-                    (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext().  //needed for TransportPM
-                            getRegistry(RegistryType.SYSTEM_CONFIGURATION);
-        } catch (Exception e) {
-            log.error("Error while retrieving config registry from Axis configuration", e);
-        }
-        if (configRegistry == null) {
-            throw new AxisFault("Configuration Registry is not available");
-        }
+//        try {
+//            configRegistry =
+//                    (Registry) PrivilegedCarbonContext.getThreadLocalCarbonContext().  //needed for TransportPM
+//                            getRegistry(RegistryType.SYSTEM_CONFIGURATION);
+//        } catch (Exception e) {
+//            log.error("Error while retrieving config registry from Axis configuration", e);
+//        }
+//        if (configRegistry == null) {
+//            throw new AxisFault("Configuration Registry is not available");
+//        }
     }
 
     /**
@@ -425,10 +419,9 @@ public abstract class AbstractPersistenceManager {
      * @param resourcePath - resource path
      * @param property     - property name
      * @return - list of values
-     * @throws RegistryException - on registry error
      * @deprecated why we need store multiple property values with the same property name specially for POLICY_UUID?
      */
-    protected List getPropertyValues(String resourcePath, String property) throws RegistryException {
+    protected List getPropertyValues(String resourcePath, String property) {
 //        Resource resource = configRegistry.get(resourcePath);
 //        List values = resource.getPropertyValues(property);
 //        resource.discard();
@@ -444,11 +437,9 @@ public abstract class AbstractPersistenceManager {
      * @param resourceXPath  - resource path of the AxisDescription
      * @throws PersistenceDataNotFoundException
      *          error in persisting data
-     * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
-     *          reg ex
      */
     protected void loadDocumentation(String serviceGroupId, AxisDescription ad, String resourceXPath)
-            throws RegistryException, PersistenceDataNotFoundException {
+            throws PersistenceDataNotFoundException {
         OMAttribute docAttr = getServiceGroupFilePM().getAttribute(serviceGroupId,
                 resourceXPath + "/@" + Resources.ServiceProperties.DOCUMENTATION);
         if (docAttr != null) {
@@ -470,12 +461,11 @@ public abstract class AbstractPersistenceManager {
      * @param policyIdList   - list of policy UUIDs
      * @param serviceXPath   - all policies are stored at service level. Therefore, fetch the
      *                       actual policy from service level
-     * @throws RegistryException - registry transaction errors
-     * @throws PersistenceDataNotFoundException
+=     * @throws PersistenceDataNotFoundException
      *                           ex
      */
     protected void loadPolicies(String serviceGroupId, AxisDescription ad, List policyIdList,
-                                String serviceXPath) throws RegistryException, PersistenceDataNotFoundException {
+                                String serviceXPath) throws PersistenceDataNotFoundException {
         // if AxisDescription is null, return
         if (ad == null) {
             return;
@@ -674,35 +664,35 @@ public abstract class AbstractPersistenceManager {
     }
 
 
-    /**
-     * Persists the given <code>Policy</code> object under policies associated with the
-     * <code>servicePath</code> in the registry.
-     *
-     * @param policy      the <code>Policy</code> instance to be persisted
-     * @param policyType  Policy Type
-     * @param servicePath - path in the registry to persist policy
-     * @throws RegistryException  if saving data to the registry is unsuccessful
-     * @throws XMLStreamException if serializing the <code>Policy<code> object is unsuccessful
-     */
-    public void persistPolicyToRegistry(Policy policy, String policyType, String servicePath)
-            throws RegistryException, XMLStreamException {
-        if (log.isDebugEnabled()) {
-            log.debug("Persisting caching policy in the registry");
-        }
-
-        Resource policyResource = PersistenceUtils.createPolicyResource(
-                configRegistry, policy, policy.getId(), policyType);
-        String policyResourcePath = servicePath + RegistryResources.POLICIES
-                + policy.getId();
-        try {
-            configRegistry.put(policyResourcePath, policyResource);
-        } catch (Exception e) {
-            String msg = "Error persisting caching policy in the configRegistry.";
-            log.error(msg, e);
-            configRegistry.rollbackTransaction();
-            throw new RegistryException(e.getMessage(), e);
-        }
-    }
+//    /**
+//     * Persists the given <code>Policy</code> object under policies associated with the
+//     * <code>servicePath</code> in the registry.
+//     *
+//     * @param policy      the <code>Policy</code> instance to be persisted
+//     * @param policyType  Policy Type
+//     * @param servicePath - path in the registry to persist policy
+//     * @throws RegistryException  if saving data to the registry is unsuccessful
+//     * @throws XMLStreamException if serializing the <code>Policy<code> object is unsuccessful
+//     */
+//    public void persistPolicyToRegistry(Policy policy, String policyType, String servicePath)
+//            throws RegistryException, XMLStreamException {
+//        if (log.isDebugEnabled()) {
+//            log.debug("Persisting caching policy in the registry");
+//        }
+//
+//        Resource policyResource = PersistenceUtils.createPolicyResource(
+//                configRegistry, policy, policy.getId(), policyType);
+//        String policyResourcePath = servicePath + RegistryResources.POLICIES
+//                + policy.getId();
+//        try {
+//            configRegistry.put(policyResourcePath, policyResource);
+//        } catch (Exception e) {
+//            String msg = "Error persisting caching policy in the configRegistry.";
+//            log.error(msg, e);
+//            configRegistry.rollbackTransaction();
+//            throw new RegistryException(e.getMessage(), e);
+//        }
+//    }
 
     private String prettyPrintXml(OMElement xml) throws PersistenceException {
         if (xml == null) {

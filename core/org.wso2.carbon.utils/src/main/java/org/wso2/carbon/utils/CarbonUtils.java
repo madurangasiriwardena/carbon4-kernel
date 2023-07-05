@@ -776,14 +776,14 @@ public class CarbonUtils {
         return System.getProperty(ServerConstants.STANDALONE_MODE, "false").equalsIgnoreCase(TRUE);
     }
 
-    /**
-     * Should we use a Registry based repo instead of a FileSystem based one?
-     *
-     * @return true - if registry based repo should be used system-wide
-     */
-    public static boolean useRegistryBasedRepository() {
-        return TRUE.equalsIgnoreCase(System.getProperty("carbon.use.registry.repo"));
-    }
+//    /**
+//     * Should we use a Registry based repo instead of a FileSystem based one?
+//     *
+//     * @return true - if registry based repo should be used system-wide
+//     */
+//    public static boolean useRegistryBasedRepository() {
+//        return TRUE.equalsIgnoreCase(System.getProperty("carbon.use.registry.repo"));
+//    }
 
     public static void checkSecurity() {
         CarbonBaseUtils.checkSecurity();

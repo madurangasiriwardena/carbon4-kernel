@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -36,16 +35,15 @@ public class AuthenticatorHelper {
 
     private static final Log log = LogFactory.getLog(AbstractAuthenticator.class);
 
-    public static UserRealm getUserRealm(int tenantId, RealmService realmService, RegistryService registryService)
+    public static UserRealm getUserRealm(int tenantId, RealmService realmService)
             throws AuthenticationException{
-        if (realmService == null || registryService == null) {
+        if (realmService == null) {
             return null;
         }
 
         try {
             String tenantDomain = realmService.getTenantManager().getDomain(tenantId);
-            return AnonymousSessionUtil.getRealmByTenantDomain(registryService,
-                    realmService, tenantDomain);
+            return AnonymousSessionUtil.getRealmByTenantDomain(realmService, tenantDomain);
         } catch (UserStoreException e) {
             String msg = "Unable to retrieve tenant domain for tenant id " + tenantId;
             log.error(msg, e);

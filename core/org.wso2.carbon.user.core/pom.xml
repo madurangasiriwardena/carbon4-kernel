@@ -142,6 +142,12 @@
             <groupId>org.wso2.carbon.crypto</groupId>
             <artifactId>org.wso2.carbon.crypto.api</artifactId>
         </dependency>
+<!--        TODO check the permission tree and remove the registry usage-->
+<!--        <dependency>-->
+<!--            <groupId>org.wso2.carbon</groupId>-->
+<!--            <artifactId>org.wso2.carbon.registry.api</artifactId>-->
+<!--            <version>4.9.5-SNAPSHOT</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>

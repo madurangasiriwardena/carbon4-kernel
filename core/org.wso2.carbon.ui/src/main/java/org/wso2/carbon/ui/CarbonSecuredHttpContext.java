@@ -24,7 +24,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.core.common.AuthenticationException;
-import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.ui.deployment.beans.CarbonUIDefinitions;
 import org.wso2.carbon.ui.deployment.beans.Context;
 import org.wso2.carbon.ui.internal.CarbonUIServiceComponent;
@@ -56,12 +55,9 @@ public class CarbonSecuredHttpContext extends SecuredComponentEntryHttpContext {
      * @param bundle
      * @param s
      * @param uiResourceRegistry
-     * @param registry
      */
-    public CarbonSecuredHttpContext(Bundle bundle, String s, UIResourceRegistry uiResourceRegistry,
-            Registry registry) {
+    public CarbonSecuredHttpContext(Bundle bundle, String s, UIResourceRegistry uiResourceRegistry) {
         super(bundle, s, uiResourceRegistry);
-        this.registry = registry;
         this.bundle = bundle;
     }
 
@@ -391,10 +387,7 @@ public class CarbonSecuredHttpContext extends SecuredComponentEntryHttpContext {
                     || requestedURI.endsWith("/fileupload")
                     || requestedURI.contains("/fileupload/")
                     || requestedURI.contains("admin/jsp/WSRequestXSSproxy_ajaxprocessor.jsp")
-                    || requestedURI.contains("tryit/JAXRSRequestXSSproxy_ajaxprocessor.jsp")
-                    || requestedURI.contains("registry/atom")
-                    || requestedURI.contains("registry/tags") || requestedURI.contains("gadgets/")
-                    || requestedURI.contains("registry/resource")) {
+                    || requestedURI.contains("tryit/JAXRSRequestXSSproxy_ajaxprocessor.jsp")) {
                 return CarbonUILoginUtil.RETURN_TRUE;
             }
 

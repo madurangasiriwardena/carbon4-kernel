@@ -90,12 +90,12 @@ public class DataSourceManager {
 	 * @param tenantId The tenant id of the tenant to be initialized
 	 * @throws DataSourceException
 	 */
-	public void initTenant(int tenantId) throws DataSourceException {
-		if (!this.isDSRepoUserDSInitialized(tenantId)) {
-		    this.getDataSourceRepository(tenantId).initRepository();
-		    this.userDSRepoInitMap.put(tenantId, true);
-		}
-	}
+//	public void initTenant(int tenantId) throws DataSourceException {
+//		if (!this.isDSRepoUserDSInitialized(tenantId)) {
+//		    this.getDataSourceRepository(tenantId).initRepository();
+//		    this.userDSRepoInitMap.put(tenantId, true);
+//		}
+//	}
 	
 	private synchronized boolean isDSRepoUserDSInitialized(int tenantId) {
 		Boolean result = this.userDSRepoInitMap.get(tenantId);
@@ -108,7 +108,7 @@ public class DataSourceManager {
 	 * @throws DataSourceException
 	 */
 	public void unloadTenant(int tenantId) throws DataSourceException {
-		this.getDataSourceRepository(tenantId).unregisterAllUserDataSources();
+//		this.getDataSourceRepository(tenantId).unregisterAllUserDataSources();
 		this.removeDataSourceRepository(tenantId);
 	}
 	

@@ -8,9 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.registry.api.RegistryService;
-import org.wso2.carbon.registry.core.ghostregistry.GhostRegistry;
 import org.wso2.carbon.tomcat.ext.internal.CarbonRealmServiceHolder;
 import org.wso2.carbon.tomcat.ext.internal.Utils;
 import org.wso2.carbon.tomcat.ext.realms.CarbonTomcatRealm;
@@ -98,11 +95,11 @@ public class CompositeValve extends ValveBase {
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUserRealm(userRealmService.getTenantUserRealm(tenantId));
 
-                RegistryService registryService = CarbonRealmServiceHolder.getRegistryService();
-                carbonContext.setRegistry(RegistryType.SYSTEM_CONFIGURATION,
-                                          new GhostRegistry(registryService, tenantId, RegistryType.SYSTEM_CONFIGURATION));
-                carbonContext.setRegistry(RegistryType.SYSTEM_GOVERNANCE,
-                                          new GhostRegistry(registryService, tenantId, RegistryType.SYSTEM_GOVERNANCE));
+//                RegistryService registryService = CarbonRealmServiceHolder.getRegistryService();
+//                carbonContext.setRegistry(RegistryType.SYSTEM_CONFIGURATION,
+//                                          new GhostRegistry(registryService, tenantId, RegistryType.SYSTEM_CONFIGURATION));
+//                carbonContext.setRegistry(RegistryType.SYSTEM_GOVERNANCE,
+//                                          new GhostRegistry(registryService, tenantId, RegistryType.SYSTEM_GOVERNANCE));
             }
             int status = response.getStatus();
             if (status != Response.SC_MOVED_TEMPORARILY && status != Response.SC_FORBIDDEN) {

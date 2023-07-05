@@ -23,8 +23,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.crypto.api.CryptoService;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import org.wso2.carbon.core.clustering.api.CoordinatedActivity;
@@ -40,12 +38,12 @@ public class CarbonCoreDataHolder {
 
     private  BundleContext bundleContext;
     private  RealmService realmService;
-    private  RegistryService registryService;
+//    private  RegistryService registryService;
     private  HttpService httpService;
     private  ListenerManager listenerManager;
     private  ConfigurationContext mainServerConfigContext;
     private  ServerConfigurationService serverConfigurationService;
-    private TenantRegistryLoader tenantRegistryLoader;
+//    private TenantRegistryLoader tenantRegistryLoader;
 
     private List<CoordinatedActivity> coordinatedActivities = new ArrayList<CoordinatedActivity>() ;
     private CryptoService cryptoService;
@@ -69,9 +67,9 @@ public class CarbonCoreDataHolder {
         this.realmService = realmService;
     }
 
-    public  void setRegistryService(RegistryService registryService) {
-        this.registryService = registryService;
-    }
+//    public  void setRegistryService(RegistryService registryService) {
+//        this.registryService = registryService;
+//    }
 
     public  void setServerConfigurationService(ServerConfigurationService serverConfigurationService) {
         this.serverConfigurationService = serverConfigurationService;
@@ -101,15 +99,16 @@ public class CarbonCoreDataHolder {
         return realmService;
     }
 
-    public  RegistryService getRegistryService() throws Exception {
-        if (registryService == null) {
-            String msg = "Before activating Carbon Core bundle, an instance of "
-                    + "RegistryService should be in existance";
-            log.error(msg);
-            throw new Exception(msg);
-        }
-        return registryService;
-    }
+//    public RegistryService getRegistryService() throws Exception {
+//        if (registryService == null) {
+//            String msg = "Before activating Carbon Core bundle, an instance of "
+//                    + "RegistryService should be in existance";
+//            log.error(msg);
+//            throw new Exception(msg);
+//        }
+//        return registryService;
+//        return null;
+//    }
 
     public  ServerConfigurationService getServerConfigurationService() {
         if (this.serverConfigurationService == null) {
@@ -137,13 +136,13 @@ public class CarbonCoreDataHolder {
         return mainServerConfigContext;
     }
 
-    public void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
-        this.tenantRegistryLoader = tenantRegistryLoader;
-    }
-
-    public TenantRegistryLoader getTenantRegistryLoader() {
-        return tenantRegistryLoader;
-    }
+//    public void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
+//        this.tenantRegistryLoader = tenantRegistryLoader;
+//    }
+//
+//    public TenantRegistryLoader getTenantRegistryLoader() {
+//        return tenantRegistryLoader;
+//    }
 
     public void addCoordinatedActivity(CoordinatedActivity coordinatedActivity) {
         coordinatedActivities.add(coordinatedActivity);

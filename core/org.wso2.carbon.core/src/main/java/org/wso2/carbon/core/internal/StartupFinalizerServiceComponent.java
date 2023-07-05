@@ -48,7 +48,6 @@ import org.wso2.carbon.core.clustering.hazelcast.HazelcastClusteringAgent;
 import org.wso2.carbon.core.init.JMXServerManager;
 import org.wso2.carbon.core.multitenancy.eager.TenantEagerLoader;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -281,13 +280,13 @@ public class StartupFinalizerServiceComponent implements ServiceListener {
     protected void unsetRealmService(RealmService realmService) {
     }
 
-    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, 
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-    }
+//    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRegistryService")
+//    protected void setRegistryService(RegistryService registryService) {
+//    }
+//
+//    protected void unsetRegistryService(RegistryService registryService) {
+//    }
 
     private void enableClustering(ConfigurationContext configContext, BundleContext bundleContext)
             throws ClusteringFault {

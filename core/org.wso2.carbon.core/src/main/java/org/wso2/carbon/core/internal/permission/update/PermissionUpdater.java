@@ -21,12 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.wso2.carbon.core.internal.CarbonCoreDataHolder;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.realm.RegistryRealm;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.core.AuthorizationManager;
+import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.authorization.JDBCAuthorizationManager;
 import org.wso2.carbon.utils.AuthenticationObserver;
@@ -46,8 +41,8 @@ public class PermissionUpdater {
     /**
      * Map containing the tenantId -> lastModifiedTime
      */
-    private static ConcurrentHashMap<Integer, Long>
-            permTreeModifiedTimeStampMap = new ConcurrentHashMap<Integer, Long>();
+//    private static ConcurrentHashMap<Integer, Long>
+//            permTreeModifiedTimeStampMap = new ConcurrentHashMap<Integer, Long>();
 
     private static CarbonCoreDataHolder dataHolder = CarbonCoreDataHolder.getInstance();
 
@@ -56,56 +51,58 @@ public class PermissionUpdater {
 
     public static void update(int tenantId) {
         try {
-            initializeRegistry(tenantId);
-            RegistryService registryService = dataHolder.getRegistryService();
-            AuthorizationManager authzManager = getAuthzManager(tenantId, registryService);
+//            initializeRegistry(tenantId);
+//            RegistryService registryService = dataHolder.getRegistryService();
+            AuthorizationManager authzManager = getAuthzManager(tenantId);
             if (authzManager instanceof JDBCAuthorizationManager) {
                 if (log.isDebugEnabled()) {
                     log.debug("Updating  permission cache for tenant: " + tenantId);
                 }
                 ((JDBCAuthorizationManager) authzManager).populatePermissionTreeFromDB();
             }
-            UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
-            Long lastModifiedTime = System.currentTimeMillis();
-            if (registry.resourceExists(PERM_TREE_TIMESTAMP_LOC) && StringUtils.isNotBlank(
-                    registry.get(PERM_TREE_TIMESTAMP_LOC).getProperty(PERM_TREE_TIMESTAMP_PROP))) {
-                Resource resource = registry.get(PERM_TREE_TIMESTAMP_LOC);
-                lastModifiedTime =
-                        new Long(resource.getProperty(PERM_TREE_TIMESTAMP_PROP).trim());
-            } else {
-                Resource resource = registry.newResource();
-                resource.setProperty(PERM_TREE_TIMESTAMP_PROP,
-                                     String.valueOf(lastModifiedTime));
-                registry.put(PERM_TREE_TIMESTAMP_LOC, resource);
-
-            }
-            permTreeModifiedTimeStampMap.put(tenantId, lastModifiedTime);
+//            UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
+//            Long lastModifiedTime = System.currentTimeMillis();
+//            if (registry.resourceExists(PERM_TREE_TIMESTAMP_LOC) && StringUtils.isNotBlank(
+//                    registry.get(PERM_TREE_TIMESTAMP_LOC).getProperty(PERM_TREE_TIMESTAMP_PROP))) {
+//                Resource resource = registry.get(PERM_TREE_TIMESTAMP_LOC);
+//                lastModifiedTime =
+//                        new Long(resource.getProperty(PERM_TREE_TIMESTAMP_PROP).trim());
+//            } else {
+//                Resource resource = registry.newResource();
+//                resource.setProperty(PERM_TREE_TIMESTAMP_PROP,
+//                                     String.valueOf(lastModifiedTime));
+//                registry.put(PERM_TREE_TIMESTAMP_LOC, resource);
+//
+//            }
+//            permTreeModifiedTimeStampMap.put(tenantId, lastModifiedTime);
             log.info("Permission cache updated for tenant " + tenantId);
         } catch (Exception e) {
             log.error("Error when updating the permission cache for tenant : " + tenantId, e);
         }
     }
 
-    private static AuthorizationManager getAuthzManager(int tenantId,
-                                                        RegistryService registryService)
-            throws UserStoreException, RegistryException {
+    private static AuthorizationManager getAuthzManager(int tenantId)
+            throws Exception {
+//        AuthorizationManager authznManager =
+//                ((RegistryRealm) registryService.getUserRealm(tenantId)).
+//                        getRealm().getAuthorizationManager();
         AuthorizationManager authznManager =
-                ((RegistryRealm) registryService.getUserRealm(tenantId)).
-                        getRealm().getAuthorizationManager();
+                CarbonCoreDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                        .getAuthorizationManager();
         return authznManager;
     }
 
     public static void remove(int tenantId) {
         try {
-            RegistryService registryService = dataHolder.getRegistryService();
-            AuthorizationManager authzManager = getAuthzManager(tenantId, registryService);
+//            RegistryService registryService = dataHolder.getRegistryService();
+            AuthorizationManager authzManager = getAuthzManager(tenantId);
             if (authzManager instanceof JDBCAuthorizationManager) {
                 if (log.isDebugEnabled()) {
                     log.debug("Updating  permission cache for tenant: " + tenantId);
                 }
                 ((JDBCAuthorizationManager) authzManager).clearPermissionTree();
             }
-            permTreeModifiedTimeStampMap.remove(tenantId);
+//            permTreeModifiedTimeStampMap.remove(tenantId);
         } catch (Exception e) {
             log.error("Error when clearing the permission cache for tenant : " + tenantId, e);
         }
@@ -116,42 +113,44 @@ public class PermissionUpdater {
      *
      * @param tenantId The ID of the tenant
      * @return true - if the tenant's cache needs update, false - otherwise
-     * @throws RegistryException If an error occurs when retrieving Registry resources
+//     * @throws RegistryException If an error occurs when retrieving Registry resources
      */
     public static boolean needsUpdating(int tenantId) throws Exception {
-        RegistryService registryService = dataHolder.getRegistryService();
-        UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
-
-        if (!registry.resourceExists(PERM_TREE_TIMESTAMP_LOC)) {
-            return false;
-        }
-
-        if (permTreeModifiedTimeStampMap.containsKey(tenantId)) {
-            Resource resource = registry.get(PERM_TREE_TIMESTAMP_LOC);
-            Long registryTimeStamp =
-                    new Long(resource.getProperty(PERM_TREE_TIMESTAMP_PROP).trim());
-            Long localTimeStamp = permTreeModifiedTimeStampMap.get(tenantId);
-
-            // If the permission tree is updated in registry
-            return (localTimeStamp < registryTimeStamp);
-        }
-        return true;
+//        RegistryService registryService = dataHolder.getRegistryService();
+//        UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
+//
+//        if (!registry.resourceExists(PERM_TREE_TIMESTAMP_LOC)) {
+//            return false;
+//        }
+//
+//        if (permTreeModifiedTimeStampMap.containsKey(tenantId)) {
+//            Resource resource = registry.get(PERM_TREE_TIMESTAMP_LOC);
+//            Long registryTimeStamp =
+//                    new Long(resource.getProperty(PERM_TREE_TIMESTAMP_PROP).trim());
+//            Long localTimeStamp = permTreeModifiedTimeStampMap.get(tenantId);
+//
+//            // If the permission tree is updated in registry
+//            return (localTimeStamp < registryTimeStamp);
+//        }
+//        return true;
+        //TODO permission tree will not be updated in a cluster. Need to fix.
+        return false;
     }
 
-    private static void initializeRegistry(int tenantId) {
-        BundleContext bundleContext = dataHolder.getBundleContext();
-        if (bundleContext != null) {
-            ServiceTracker tracker =
-                    new ServiceTracker(bundleContext,
-                            AuthenticationObserver.class.getName(), null);
-            tracker.open();
-            Object[] services = tracker.getServices();
-            if (services != null) {
-                for (Object service : services) {
-                    ((AuthenticationObserver) service).startedAuthentication(tenantId);
-                }
-            }
-            tracker.close();
-        }
-    }
+//    private static void initializeRegistry(int tenantId) {
+//        BundleContext bundleContext = dataHolder.getBundleContext();
+//        if (bundleContext != null) {
+//            ServiceTracker tracker =
+//                    new ServiceTracker(bundleContext,
+//                            AuthenticationObserver.class.getName(), null);
+//            tracker.open();
+//            Object[] services = tracker.getServices();
+//            if (services != null) {
+//                for (Object service : services) {
+//                    ((AuthenticationObserver) service).startedAuthentication(tenantId);
+//                }
+//            }
+//            tracker.close();
+//        }
+//    }
 }

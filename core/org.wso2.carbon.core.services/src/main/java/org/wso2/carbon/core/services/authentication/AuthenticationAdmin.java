@@ -31,7 +31,6 @@ import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
 import org.wso2.carbon.core.services.internal.CarbonServicesServiceComponent;
 import org.wso2.carbon.core.services.util.CarbonAuthenticationUtil;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -83,7 +82,6 @@ public class AuthenticationAdmin implements CarbonServerAuthenticator {
                         = AuthenticationUtil.getRemoteAddress(MessageContext.getCurrentMessageContext());
             }
             
-            RegistryService registryService = CarbonServicesServiceComponent.getRegistryService();
             RealmService realmService = CarbonServicesServiceComponent.getRealmService();
 
             int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
@@ -93,9 +91,7 @@ public class AuthenticationAdmin implements CarbonServerAuthenticator {
             carbonContext.setTenantDomain(tenantDomain);
             carbonContext.setTenantId(tenantId);
             username = MultitenantUtils.getTenantAwareUsername(username);
-            UserRealm realm = AnonymousSessionUtil.getRealmByTenantDomain(registryService,
-                    realmService, tenantDomain);
-
+            UserRealm realm = AnonymousSessionUtil.getRealmByTenantDomain(realmService, tenantDomain);
             
             if (realm == null) {
                 throw new AuthenticationException("Invalid domain or unactivated tenant login");

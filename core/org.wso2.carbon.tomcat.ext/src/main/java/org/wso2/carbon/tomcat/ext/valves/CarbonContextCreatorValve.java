@@ -27,9 +27,6 @@ import org.slf4j.MDC;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.registry.api.RegistryService;
-import org.wso2.carbon.registry.core.ghostregistry.GhostRegistry;
 import org.wso2.carbon.tomcat.ext.internal.CarbonRealmServiceHolder;
 import org.wso2.carbon.tomcat.ext.internal.Utils;
 import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
@@ -140,13 +137,13 @@ public class CarbonContextCreatorValve extends ValveBase {
             carbonContext.setTenantId(tenantId);
             //carbonContext.setUserRealm(userRealmService.getTenantUserRealm(tenantId));
 
-            RegistryService registryService = CarbonRealmServiceHolder.getRegistryService();
-            carbonContext.setRegistry( RegistryType.SYSTEM_CONFIGURATION,
-                    new GhostRegistry(registryService, tenantId,
-                            RegistryType.SYSTEM_CONFIGURATION));
-            carbonContext.setRegistry(RegistryType.SYSTEM_GOVERNANCE,
-                    new GhostRegistry(registryService, tenantId,
-                            RegistryType.SYSTEM_GOVERNANCE));
+//            RegistryService registryService = CarbonRealmServiceHolder.getRegistryService();
+//            carbonContext.setRegistry( RegistryType.SYSTEM_CONFIGURATION,
+//                    new GhostRegistry(registryService, tenantId,
+//                            RegistryType.SYSTEM_CONFIGURATION));
+//            carbonContext.setRegistry(RegistryType.SYSTEM_GOVERNANCE,
+//                    new GhostRegistry(registryService, tenantId,
+//                            RegistryType.SYSTEM_GOVERNANCE));
         }
     }
 

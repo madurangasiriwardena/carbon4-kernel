@@ -51,7 +51,7 @@ public class DataSourceService {
 	}
 	
 	public void reloadAllDataSources() throws DataSourceException {
-		DataSourceManager.getInstance().getDataSourceRepository().refreshAllUserDataSources();
+//		DataSourceManager.getInstance().getDataSourceRepository().refreshAllUserDataSources();
 	}
 	
 	public void reloadDataSource(String dsName) throws DataSourceException {

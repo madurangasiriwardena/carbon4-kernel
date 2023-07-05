@@ -29,9 +29,6 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.ServerManagement;
-import org.wso2.carbon.registry.core.config.RegistryContext;
-import org.wso2.carbon.registry.core.dataaccess.DataAccessManager;
-import org.wso2.carbon.registry.core.jdbc.dataaccess.JDBCDataAccessManager;
 import org.wso2.carbon.server.admin.common.IServerAdmin;
 import org.wso2.carbon.server.admin.common.ServerData;
 import org.wso2.carbon.server.admin.common.ServerUpTime;
@@ -119,33 +116,33 @@ public class ServerAdmin extends AbstractAdmin implements ServerAdminMBean, ISer
             // Extract DB related data from RegistryContext
             Connection dbConnection = null;
             if (registryType.equals("embedded")) {
-                try {
-                    DataAccessManager dataAccessManager =
-                            RegistryContext.getBaseInstance().getDataAccessManager();
-                    if (!(dataAccessManager instanceof JDBCDataAccessManager)) {
-                        String msg = "Failed to obtain DB connection. Invalid data access manager.";
-                        log.error(msg);
-                        throw new AxisFault(msg);
-                    }
-                    DataSource dataSource = ((JDBCDataAccessManager)dataAccessManager).getDataSource();
-                    dbConnection = dataSource.getConnection();
-                    DatabaseMetaData metaData = dbConnection.getMetaData();
-                    if (metaData != null) {
-                        data.setDbName(metaData.getDatabaseProductName());
-                        data.setDbVersion(metaData.getDatabaseProductVersion());
-                        data.setDbDriverName(metaData.getDriverName());
-                        data.setDbDriverVersion(metaData.getDriverVersion());
-                        data.setDbURL(metaData.getURL());
-                    }
-                } catch (SQLException e) {
-                    String msg = "Cannot create DB connection";
-                    log.error(msg, e);
-                    throw new AxisFault(msg, e);
-                } finally {
-                    if (dbConnection != null) {
-                        dbConnection.close();
-                    }
-                }
+//                try {
+//                    DataAccessManager dataAccessManager =
+//                            RegistryContext.getBaseInstance().getDataAccessManager();
+//                    if (!(dataAccessManager instanceof JDBCDataAccessManager)) {
+//                        String msg = "Failed to obtain DB connection. Invalid data access manager.";
+//                        log.error(msg);
+//                        throw new AxisFault(msg);
+//                    }
+//                    DataSource dataSource = ((JDBCDataAccessManager)dataAccessManager).getDataSource();
+//                    dbConnection = dataSource.getConnection();
+//                    DatabaseMetaData metaData = dbConnection.getMetaData();
+//                    if (metaData != null) {
+//                        data.setDbName(metaData.getDatabaseProductName());
+//                        data.setDbVersion(metaData.getDatabaseProductVersion());
+//                        data.setDbDriverName(metaData.getDriverName());
+//                        data.setDbDriverVersion(metaData.getDriverVersion());
+//                        data.setDbURL(metaData.getURL());
+//                    }
+//                } catch (SQLException e) {
+//                    String msg = "Cannot create DB connection";
+//                    log.error(msg, e);
+//                    throw new AxisFault(msg, e);
+//                } finally {
+//                    if (dbConnection != null) {
+//                        dbConnection.close();
+//                    }
+//                }
             } else if (registryType.equals("remote")) {
                 data.setRemoteRegistryChroot(serverConfig.getFirstProperty("Registry.Chroot"));
                 data.setRemoteRegistryURL(serverConfig.getFirstProperty("Registry.Url"));

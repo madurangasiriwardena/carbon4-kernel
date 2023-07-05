@@ -41,12 +41,9 @@ import org.wso2.carbon.core.CarbonAxisConfigurator;
 import org.wso2.carbon.core.CarbonThreadFactory;
 import org.wso2.carbon.core.deployment.CarbonDeploymentSchedulerTask;
 import org.wso2.carbon.core.deployment.DeploymentInterceptor;
-import org.wso2.carbon.core.deployment.RegistryBasedRepository;
-import org.wso2.carbon.core.deployment.RegistryBasedRepositoryUpdater;
 import org.wso2.carbon.core.internal.CarbonCoreDataHolder;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.util.ParameterUtil;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.PreAxisConfigurationPopulationObserver;
 import org.wso2.carbon.utils.WSO2Constants;
@@ -90,7 +87,7 @@ public class TenantAxisConfigurator extends DeploymentEngine implements AxisConf
     private final String tenantDomain;
     private final int tenantId;
     private final String repoLocation;
-    private final UserRegistry registry;
+//    private final UserRegistry registry;
     private final BundleContext bundleContext;
     private final Bundle[] moduleBundles;
     private final Bundle[] deployerBundles;
@@ -102,12 +99,11 @@ public class TenantAxisConfigurator extends DeploymentEngine implements AxisConf
     @Deprecated
     public TenantAxisConfigurator(AxisConfiguration mainAxisConfig,
                                   String tenantDomain,
-                                  int tenantId,
-                                  UserRegistry registry) throws AxisFault {
+                                  int tenantId) throws AxisFault {
         this.tenantDomain = tenantDomain;
         this.tenantId = tenantId;
         this.mainAxisConfig = mainAxisConfig;
-        this.registry = registry;
+//        this.registry = registry;
         this.bundleContext = CarbonCoreDataHolder.getInstance().getBundleContext();
         this.moduleBundles =
                 ((CarbonAxisConfigurator) mainAxisConfig.getConfigurator()).
@@ -122,53 +118,53 @@ public class TenantAxisConfigurator extends DeploymentEngine implements AxisConf
         this.repoLocation = tenantDir.getAbsolutePath();
 
         // Use registry based deployer if necessary
-        if (CarbonUtils.useRegistryBasedRepository()) {
-            String registryPath = "/repository/deployment";
-            new RegistryBasedRepository(registry,
-                                        registryPath,
-                                        repoLocation).updateFileSystemFromRegistry();
-            RegistryBasedRepositoryUpdater.scheduleAtFixedRate(registry,
-                                                               registryPath,
-                                                               repoLocation, 0, 10);
-        }
+//        if (CarbonUtils.useRegistryBasedRepository()) {
+//            String registryPath = "/repository/deployment";
+//            new RegistryBasedRepository(registry,
+//                                        registryPath,
+//                                        repoLocation).updateFileSystemFromRegistry();
+//            RegistryBasedRepositoryUpdater.scheduleAtFixedRate(registry,
+//                                                               registryPath,
+//                                                               repoLocation, 0, 10);
+//        }
     }
 
     // New constructor is introduced to set the config and local registry separately
 
-    public TenantAxisConfigurator(AxisConfiguration mainAxisConfig,
-                                  String tenantDomain,
-                                  int tenantId,
-                                  UserRegistry configRegistry,
-                                  UserRegistry localRegistry) throws AxisFault {
-        this.tenantDomain = tenantDomain;
-        this.tenantId = tenantId;
-        this.mainAxisConfig = mainAxisConfig;
-        this.registry = configRegistry;
-        this.bundleContext = CarbonCoreDataHolder.getInstance().getBundleContext();
-        this.moduleBundles =
-                ((CarbonAxisConfigurator) mainAxisConfig.getConfigurator()).
-                        getConfigItemHolder().getModuleBundles();
-        this.deployerBundles =
-                ((CarbonAxisConfigurator) mainAxisConfig.getConfigurator()).
-                        getConfigItemHolder().getDeployerBundles();
-        String filePath = MultitenantUtils.getAxis2RepositoryPath(tenantId);
-        File tenantDir = new File(filePath);
-        if (!tenantDir.exists() && !tenantDir.mkdirs()) {
-            log.warn("Could not create directory " + tenantDir.getAbsolutePath());
-        }
-        this.repoLocation = filePath;
-
-        // Use registry based deployer if necessary
-        if (CarbonUtils.useRegistryBasedRepository()) {
-            String registryPath = "/repository/deployment";
-            new RegistryBasedRepository(localRegistry,
-                                        registryPath,
-                                        repoLocation).updateFileSystemFromRegistry();
-            RegistryBasedRepositoryUpdater.scheduleAtFixedRate(localRegistry,
-                                                               registryPath,
-                                                               repoLocation, 0, 10);
-        }
-    }
+//    public TenantAxisConfigurator(AxisConfiguration mainAxisConfig,
+//                                  String tenantDomain,
+//                                  int tenantId,
+//                                  UserRegistry configRegistry,
+//                                  UserRegistry localRegistry) throws AxisFault {
+//        this.tenantDomain = tenantDomain;
+//        this.tenantId = tenantId;
+//        this.mainAxisConfig = mainAxisConfig;
+//        this.registry = configRegistry;
+//        this.bundleContext = CarbonCoreDataHolder.getInstance().getBundleContext();
+//        this.moduleBundles =
+//                ((CarbonAxisConfigurator) mainAxisConfig.getConfigurator()).
+//                        getConfigItemHolder().getModuleBundles();
+//        this.deployerBundles =
+//                ((CarbonAxisConfigurator) mainAxisConfig.getConfigurator()).
+//                        getConfigItemHolder().getDeployerBundles();
+//        String filePath = MultitenantUtils.getAxis2RepositoryPath(tenantId);
+//        File tenantDir = new File(filePath);
+//        if (!tenantDir.exists() && !tenantDir.mkdirs()) {
+//            log.warn("Could not create directory " + tenantDir.getAbsolutePath());
+//        }
+//        this.repoLocation = filePath;
+//
+//        // Use registry based deployer if necessary
+//        if (CarbonUtils.useRegistryBasedRepository()) {
+//            String registryPath = "/repository/deployment";
+//            new RegistryBasedRepository(localRegistry,
+//                                        registryPath,
+//                                        repoLocation).updateFileSystemFromRegistry();
+//            RegistryBasedRepositoryUpdater.scheduleAtFixedRate(localRegistry,
+//                                                               registryPath,
+//                                                               repoLocation, 0, 10);
+//        }
+//    }
 
     private String getTenantString(String tenantDomain, int tenantId) {
         return tenantDomain + "[" + tenantId + "]";
@@ -434,30 +430,30 @@ public class TenantAxisConfigurator extends DeploymentEngine implements AxisConf
             throw new DeploymentException(msg, e);
         }
 
-        carbonContext.setRegistry(RegistryType.SYSTEM_CONFIGURATION, registry);
-        try {
-            // TODO: The governance system registry should be passed into the tenant axis
-            // configurator like the config system registry - Senaka.
-            carbonContext.setRegistry(RegistryType.SYSTEM_GOVERNANCE,
-                    CarbonCoreDataHolder.getInstance().getRegistryService()
-                            .getGovernanceSystemRegistry(tenantId));
-            carbonContext.setRegistry(RegistryType.LOCAL_REPOSITORY,
-                    CarbonCoreDataHolder.getInstance().getRegistryService().
-                            getLocalRepository(tenantId));
-        } catch (Exception ignored) {
-            // We are not worried about the exception in here.
-        }
+//        carbonContext.setRegistry(RegistryType.SYSTEM_CONFIGURATION, registry);
+//        try {
+//            // TODO: The governance system registry should be passed into the tenant axis
+//            // configurator like the config system registry - Senaka.
+//            carbonContext.setRegistry(RegistryType.SYSTEM_GOVERNANCE,
+//                    CarbonCoreDataHolder.getInstance().getRegistryService()
+//                            .getGovernanceSystemRegistry(tenantId));
+//            carbonContext.setRegistry(RegistryType.LOCAL_REPOSITORY,
+//                    CarbonCoreDataHolder.getInstance().getRegistryService().
+//                            getLocalRepository(tenantId));
+//        } catch (Exception ignored) {
+//            // We are not worried about the exception in here.
+//        }
 
         // The following two lines of code are kept for backward compatibility. Remove this once we
         // are certain that this is not required. -- Senaka.
         // Please also note that we no longer need to set the user realm to the configuration
         // explicitly.
-        setRegistry();
-        setUserRealm();
+//        setRegistry();
+//        setUserRealm();
 
         // Add the DeploymentInterceptor for the tenant AxisConfigurations
         DeploymentInterceptor interceptor = new DeploymentInterceptor();
-        interceptor.setRegistry(registry);
+//        interceptor.setRegistry(registry);
         interceptor.init(axisConfig);
         axisConfig.addObservers(interceptor);
 
@@ -553,28 +549,28 @@ public class TenantAxisConfigurator extends DeploymentEngine implements AxisConf
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
-        if (CarbonUtils.useRegistryBasedRepository()) {
-            RegistryBasedRepositoryUpdater.cancelTask(repoLocation);
-        }
+//        if (CarbonUtils.useRegistryBasedRepository()) {
+//            RegistryBasedRepositoryUpdater.cancelTask(repoLocation);
+//        }
     }
 
-    private void setRegistry() throws DeploymentException {
-        Parameter param = new Parameter(WSO2Constants.CONFIG_SYSTEM_REGISTRY_INSTANCE, registry);
-        try {
-            axisConfig.addParameter(param);
-        } catch (AxisFault axisFault) {
-            throw new DeploymentException(axisFault.getMessage(), axisFault);
-        }
-    }
-
-    private void setUserRealm() throws DeploymentException {
-        Parameter param = new Parameter(WSO2Constants.USER_REALM_INSTANCE, registry.getUserRealm());
-        try {
-            axisConfig.addParameter(param);
-        } catch (AxisFault axisFault) {
-            throw new DeploymentException(axisFault.getMessage(), axisFault);
-        }
-    }
+//    private void setRegistry() throws DeploymentException {
+//        Parameter param = new Parameter(WSO2Constants.CONFIG_SYSTEM_REGISTRY_INSTANCE, registry);
+//        try {
+//            axisConfig.addParameter(param);
+//        } catch (AxisFault axisFault) {
+//            throw new DeploymentException(axisFault.getMessage(), axisFault);
+//        }
+//    }
+//
+//    private void setUserRealm() throws DeploymentException {
+//        Parameter param = new Parameter(WSO2Constants.USER_REALM_INSTANCE, registry.getUserRealm());
+//        try {
+//            axisConfig.addParameter(param);
+//        } catch (AxisFault axisFault) {
+//            throw new DeploymentException(axisFault.getMessage(), axisFault);
+//        }
+//    }
 
     private static void setHostName(AxisConfiguration axisConfig) throws DeploymentException {
         try {

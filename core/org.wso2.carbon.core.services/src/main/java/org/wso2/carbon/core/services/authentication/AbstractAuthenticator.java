@@ -32,7 +32,6 @@ import org.wso2.carbon.core.common.AuthenticationException;
 import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
 import org.wso2.carbon.core.services.internal.CarbonServicesServiceComponent;
 import org.wso2.carbon.core.services.util.CarbonAuthenticationUtil;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -244,18 +243,18 @@ public abstract class AbstractAuthenticator extends AbstractAdmin implements Ser
     protected void onSuccessLogin(HttpSession httpSession, String userName)
             throws Exception {
 
-        if (httpSession.getAttribute(RegistryConstants.ROOT_REGISTRY_INSTANCE) != null) {
-            return;
-        }
+//        if (httpSession.getAttribute(RegistryConstants.ROOT_REGISTRY_INSTANCE) != null) {
+//            return;
+//        }
 
         // If user is already authenticated then set the root registry instance
         // this is useful when server is restarted and browser keeps the same session
         // for e.g. :- restart carbon server and in the same browser session click registry UI
 
-        String tenantDomain = getTenantDomain();
-        int tenantId = getTenantId(tenantDomain);
+//        String tenantDomain = getTenantDomain();
+//        int tenantId = getTenantId(tenantDomain);
 
-        CarbonAuthenticationUtil.initializeLoggedInUserRegistry(httpSession, userName, tenantId, tenantDomain);
+//        CarbonAuthenticationUtil.initializeLoggedInUserRegistry(httpSession, userName, tenantId, tenantDomain);
     }
 
     /**

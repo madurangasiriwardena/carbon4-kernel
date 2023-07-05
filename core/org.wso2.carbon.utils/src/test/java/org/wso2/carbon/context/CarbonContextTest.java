@@ -26,8 +26,6 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.BaseTest;
 import org.wso2.carbon.context.internal.CarbonContextDataHolder;
 import org.wso2.carbon.context.internal.OSGiDataHolder;
-import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.api.RegistryService;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserRealmService;
 
@@ -205,35 +203,35 @@ public class CarbonContextTest extends BaseTest {
             String username = "testUser222";
 
             UserRealm userRealm = Mockito.mock(UserRealm.class);
-            Registry registry = Mockito.mock(Registry.class);
+//            Registry registry = Mockito.mock(Registry.class);
 
             privilegedCarbonContext.setTenantDomain(tenantDomain);
             privilegedCarbonContext.setTenantId(tenantID);
             privilegedCarbonContext.setApplicationName(applicationName);
             privilegedCarbonContext.setUsername(username);
             privilegedCarbonContext.setUserRealm(userRealm);
-            privilegedCarbonContext.setRegistry(RegistryType.SYSTEM_CONFIGURATION, registry);
-            privilegedCarbonContext.setRegistry(RegistryType.SYSTEM_GOVERNANCE, registry);
-            privilegedCarbonContext.setRegistry(RegistryType.USER_CONFIGURATION, registry);
-            privilegedCarbonContext.setRegistry(RegistryType.USER_GOVERNANCE, registry);
-            privilegedCarbonContext.setRegistry(RegistryType.LOCAL_REPOSITORY, registry);
+//            privilegedCarbonContext.setRegistry(RegistryType.SYSTEM_CONFIGURATION, registry);
+//            privilegedCarbonContext.setRegistry(RegistryType.SYSTEM_GOVERNANCE, registry);
+//            privilegedCarbonContext.setRegistry(RegistryType.USER_CONFIGURATION, registry);
+//            privilegedCarbonContext.setRegistry(RegistryType.USER_GOVERNANCE, registry);
+//            privilegedCarbonContext.setRegistry(RegistryType.LOCAL_REPOSITORY, registry);
 
-            OSGiDataHolder dataHolder = OSGiDataHolder.getInstance();
+//            OSGiDataHolder dataHolder = OSGiDataHolder.getInstance();
 
-            RegistryService registryService = Mockito.mock(RegistryService.class);
-            dataHolder.setRegistryService(registryService);
-
-            when(registryService.getConfigSystemRegistry(tenantID)).thenReturn(registry);
-            when(registryService.getConfigUserRegistry(username, tenantID)).thenReturn(registry);
-            when(registryService.getGovernanceSystemRegistry(tenantID)).thenReturn(registry);
-            when(registryService.getGovernanceUserRegistry(username, tenantID)).thenReturn(registry);
-            when(registryService.getLocalRepository(tenantID)).thenReturn(registry);
-
-            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.SYSTEM_CONFIGURATION), registry);
-            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.SYSTEM_GOVERNANCE), registry);
-            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.USER_CONFIGURATION), registry);
-            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.USER_GOVERNANCE), registry);
-            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.LOCAL_REPOSITORY), registry);
+//            RegistryService registryService = Mockito.mock(RegistryService.class);
+//            dataHolder.setRegistryService(registryService);
+//
+//            when(registryService.getConfigSystemRegistry(tenantID)).thenReturn(registry);
+//            when(registryService.getConfigUserRegistry(username, tenantID)).thenReturn(registry);
+//            when(registryService.getGovernanceSystemRegistry(tenantID)).thenReturn(registry);
+//            when(registryService.getGovernanceUserRegistry(username, tenantID)).thenReturn(registry);
+//            when(registryService.getLocalRepository(tenantID)).thenReturn(registry);
+//
+//            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.SYSTEM_CONFIGURATION), registry);
+//            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.SYSTEM_GOVERNANCE), registry);
+//            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.USER_CONFIGURATION), registry);
+//            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.USER_GOVERNANCE), registry);
+//            Assert.assertEquals(privilegedCarbonContext.getRegistry(RegistryType.LOCAL_REPOSITORY), registry);
 
             Assert.assertEquals(privilegedCarbonContext.getUserRealm(), userRealm);
         } finally {

@@ -20,13 +20,17 @@ package org.wso2.carbon.core.encryption;
 
 import org.apache.axiom.om.util.Base64;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -35,15 +39,6 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 public class SymmetricEncryption {
 
@@ -137,7 +132,6 @@ public class SymmetricEncryption {
         Cipher c = null;
         byte[] encryptedData = null;
         String encryptionAlgo;
-        String symmetricKeyInRegistry;
         try {
             if (symmetricKeyEncryptAlgo == null) {
                 encryptionAlgo = symmetricKeyEncryptAlgoDefault;

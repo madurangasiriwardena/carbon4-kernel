@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.services.internal.CarbonServicesServiceComponent;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
@@ -157,11 +156,9 @@ public class BasicAccessAuthenticator extends AbstractAuthenticator {
     protected void doAuthentication(String userNameInRequest, int tenantId, MessageContext msgContext)
             throws AuthenticationFailureException {
 
-        RegistryService registryService;
         UserRealm realm;
         try {
-            registryService = CarbonServicesServiceComponent.getRegistryService();
-            realm = AuthenticatorHelper.getUserRealm(tenantId, getRealmService(), registryService);
+            realm = AuthenticatorHelper.getUserRealm(tenantId, getRealmService());
 
         } catch (Exception e) {
             log.error("Error retrieving user realm for authentication. Tenant id " +

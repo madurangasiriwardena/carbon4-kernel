@@ -47,16 +47,16 @@ public class CarbonRealmServiceHolderTest {
                 "retrieved value did not match with set value for realmService");
     }
 
-    @Test(groups = {"org.wso2.carbon.tomcat.ext.internal"},
-            description = "Testing getters and setters for Registry Service.")
-    public void testRegistryService () {
-        // mocking inputs
-        RegistryService registryService = mock(RegistryService.class);
-        // calling set method
-        CarbonRealmServiceHolder.setRegistryService(registryService);
-        // checking retrieved values
-        log.info("Testing getters and setters for registryService");
-        Assert.assertEquals(CarbonRealmServiceHolder.getRegistryService(), registryService,
-                "retrieved value did not match with set value for registryService");
+//    @Test(groups = {"org.wso2.carbon.tomcat.ext.internal"},
+//            description = "Testing getters and setters for Registry Service.")
+//    public void testRegistryService () {
+//        // mocking inputs
+//        RegistryService registryService = mock(RegistryService.class);
+//        // calling set method
+//        CarbonRealmServiceHolder.setRegistryService(registryService);
+//        // checking retrieved values
+//        log.info("Testing getters and setters for registryService");
+//        Assert.assertEquals(CarbonRealmServiceHolder.getRegistryService(), registryService,
+//                "retrieved value did not match with set value for registryService");
     }
 }

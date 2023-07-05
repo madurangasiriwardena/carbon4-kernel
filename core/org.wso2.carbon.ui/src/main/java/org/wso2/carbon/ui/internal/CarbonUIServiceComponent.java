@@ -43,8 +43,6 @@ import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.api.ServerConfigurationService;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.tomcat.api.CarbonTomcatService;
 import org.wso2.carbon.ui.BasicAuthUIAuthenticator;
 import org.wso2.carbon.ui.CarbonProtocol;
@@ -102,7 +100,7 @@ public class CarbonUIServiceComponent {
     private static Log log = LogFactory.getLog(CarbonUIServiceComponent.class);
 
     private static PackageAdmin packageAdminInstance;
-    private static RegistryService registryServiceInstance;
+//    private static RegistryService registryServiceInstance;
     private static HttpService httpServiceInstance;
     private static ConfigurationContextService ccServiceInstance;
     private static ServerConfigurationService serverConfiguration;
@@ -249,8 +247,8 @@ public class CarbonUIServiceComponent {
         if (indexPageURL == null) {
             indexPageURL = "/carbon/admin/index.jsp";
         }
-        RegistryService registryService = getRegistryService();
-        Registry registry = registryService.getLocalRepository();
+//        RegistryService registryService = getRegistryService();
+//        Registry registry = registryService.getLocalRepository();
 
         UIBundleDeployer uiBundleDeployer = new UIBundleDeployer();
         UIResourceRegistry uiResourceRegistry = new UIResourceRegistry();
@@ -260,7 +258,7 @@ public class CarbonUIServiceComponent {
 //        BundleResourcePathRegistry resourcePathRegistry = uiBundleDeployer.getBundleResourcePathRegistry();
 
         HttpContext commonContext =
-                new CarbonSecuredHttpContext(context.getBundle(), "/web", uiResourceRegistry, registry);
+                new CarbonSecuredHttpContext(context.getBundle(), "/web", uiResourceRegistry);
 
         //Registering filedownload servlet
         Servlet fileDownloadServlet = new ContextPathServletAdaptor(new FileDownloadServlet(
@@ -308,7 +306,7 @@ public class CarbonUIServiceComponent {
         jspServletContext.setAttribute(
                 InstanceManager.class.getName(), getTomcatInstanceManager());
 
-        jspServletContext.setAttribute("registry", registryService);
+//        jspServletContext.setAttribute("registry", registryService);
 
         jspServletContext.setAttribute(CarbonConstants.SERVER_CONFIGURATION, serverConfig);
         jspServletContext.setAttribute(CarbonConstants.CLIENT_CONFIGURATION_CONTEXT, clientConfigContext);
@@ -465,15 +463,15 @@ public class CarbonUIServiceComponent {
         carbonTomcatService = null;
     }
     
-    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-        registryServiceInstance = registryService;
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-        registryServiceInstance = null;
-    }
+//    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRegistryService")
+//    protected void setRegistryService(RegistryService registryService) {
+//        registryServiceInstance = registryService;
+//    }
+//
+//    protected void unsetRegistryService(RegistryService registryService) {
+//        registryServiceInstance = null;
+//    }
 
     @Reference(name = "server.configuration", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetServerConfigurationService")
@@ -554,15 +552,15 @@ public class CarbonUIServiceComponent {
         return ccServiceInstance;
     }
 
-    public static RegistryService getRegistryService() {
-        if (registryServiceInstance == null) {
-            String msg = "Before activating Carbon UI bundle, an instance of "
-                         + "RegistryService should be in existence";
-            log.error(msg);
-            throw new RuntimeException(msg);
-        }
-        return registryServiceInstance;
-    }
+//    public static RegistryService getRegistryService() {
+//        if (registryServiceInstance == null) {
+//            String msg = "Before activating Carbon UI bundle, an instance of "
+//                         + "RegistryService should be in existence";
+//            log.error(msg);
+//            throw new RuntimeException(msg);
+//        }
+//        return registryServiceInstance;
+//    }
 
     public static ServerConfigurationService getServerConfiguration() {
         if (serverConfiguration == null) {

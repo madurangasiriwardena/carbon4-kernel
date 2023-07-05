@@ -34,7 +34,6 @@ import org.wso2.carbon.core.services.callback.LoginSubscriptionManagerService;
 import org.wso2.carbon.core.services.callback.LoginSubscriptionManagerServiceImpl;
 import org.wso2.carbon.core.services.filedownload.FileDownloadService;
 import org.wso2.carbon.core.services.fileupload.FileUploadService;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -42,12 +41,12 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 public class CarbonServicesServiceComponent {
 
     private static RealmService realmService;
-    private static RegistryService registryService;
+//    private static RegistryService registryService;
     private static ServerConfigurationService serverConfiguration;
     private static ConfigurationContextService configContextService;
     private static BundleContext bundleContext;
 
-    private static LoginSubscriptionManagerServiceImpl loginSubscriptionManagerServiceImpl = new LoginSubscriptionManagerServiceImpl();
+//    private static LoginSubscriptionManagerServiceImpl loginSubscriptionManagerServiceImpl = new LoginSubscriptionManagerServiceImpl();
 
     private static final Log log = LogFactory.getLog(CarbonServicesServiceComponent.class);
 
@@ -58,8 +57,8 @@ public class CarbonServicesServiceComponent {
             CarbonServicesServiceComponent.bundleContext = bc;
             bc.registerService(IFileUpload.class.getName(), new FileUploadService(), null);
             bc.registerService(IFileDownload.class.getName(), new FileDownloadService(), null);
-            bc.registerService(LoginSubscriptionManagerService.class.getName(),
-                    loginSubscriptionManagerServiceImpl, null);
+//            bc.registerService(LoginSubscriptionManagerService.class.getName(),
+//                    loginSubscriptionManagerServiceImpl, null);
 
             log.debug("Carbon Core Services bundle is activated ");
         } catch (Throwable e) {
@@ -83,15 +82,15 @@ public class CarbonServicesServiceComponent {
         log.debug("Carbon Core Services bundle is deactivated ");
     }
 
-    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, 
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-        CarbonServicesServiceComponent.registryService = registryService;
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-       CarbonServicesServiceComponent.registryService = null;
-    }
+//    @Reference(name = "registry.service", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRegistryService")
+//    protected void setRegistryService(RegistryService registryService) {
+//        CarbonServicesServiceComponent.registryService = registryService;
+//    }
+//
+//    protected void unsetRegistryService(RegistryService registryService) {
+//       CarbonServicesServiceComponent.registryService = null;
+//    }
     
     @Reference(name = "user.realmservice.default", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC, 
             unbind = "unsetRealmService")
@@ -121,19 +120,19 @@ public class CarbonServicesServiceComponent {
         return realmService;
     }
 
-    public static RegistryService getRegistryService() throws Exception {
-        if (registryService == null) {
-            String msg = "Before activating Carbon Services bundle, an instance of "
-                    + "RegistryService should be in existance";
-            log.error(msg);
-            throw new Exception(msg);
-        }
-        return registryService;
-    }
+//    public static RegistryService getRegistryService() throws Exception {
+//        if (registryService == null) {
+//            String msg = "Before activating Carbon Services bundle, an instance of "
+//                    + "RegistryService should be in existance";
+//            log.error(msg);
+//            throw new Exception(msg);
+//        }
+//        return registryService;
+//    }
 
-    public static LoginSubscriptionManagerServiceImpl getLoginSubscriptionManagerServiceImpl() {
-        return loginSubscriptionManagerServiceImpl;
-    }
+//    public static LoginSubscriptionManagerServiceImpl getLoginSubscriptionManagerServiceImpl() {
+//        return loginSubscriptionManagerServiceImpl;
+//    }
 
     public static ServerConfigurationService getServerConfiguration() throws Exception {
         if (serverConfiguration == null) {

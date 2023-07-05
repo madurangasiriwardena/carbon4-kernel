@@ -18,12 +18,11 @@
  */
 package org.wso2.carbon.core.services.callback;
 
-import org.wso2.carbon.registry.core.Registry;
 
 /**
  * The LoginCallback allows you to register a logic to execute on a login
  */
 public interface LoginListener {
     // called in a succesful login.
-    void onLogin(Registry configRegistry, LoginEvent event);
+//    void onLogin(Registry configRegistry, LoginEvent event);
 }

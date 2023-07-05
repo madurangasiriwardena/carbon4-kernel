@@ -34,13 +34,13 @@ public class DataSourceAxis2ConfigurationContextObserver extends
 
 	@Override
 	public void createdConfigurationContext(ConfigurationContext configContext) {
-		int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-		try {
-			DataSourceManager.getInstance().initTenant(tenantId);
-		} catch (DataSourceException e) {
-			log.error("Error in initializing data sources for tenant: " + 
-		            tenantId + " - " + e.getMessage(), e);
-		}
+//		int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+//		try {
+//			DataSourceManager.getInstance().initTenant(tenantId);
+//		} catch (DataSourceException e) {
+//			log.error("Error in initializing data sources for tenant: " +
+//		            tenantId + " - " + e.getMessage(), e);
+//		}
 	}
 	
 	public void terminatingConfigurationContext(ConfigurationContext configContext) {

@@ -18,8 +18,6 @@
  */
 package org.wso2.carbon.core.services.callback;
 
-import org.wso2.carbon.registry.core.Registry;
-
 import java.util.ArrayList;
 
 public class LoginSubscriptionManagerServiceImpl implements LoginSubscriptionManagerService {
@@ -33,13 +31,13 @@ public class LoginSubscriptionManagerServiceImpl implements LoginSubscriptionMan
         subscriptions.add(listener);
     }
 
-    public void triggerEvent(Registry configRegistry, String username, int tenantId, String tenantDomain) {
-        for (int i = 0; i < subscriptions.size(); i ++) {
-            LoginEvent event = new LoginEvent();
-            event.setTenantDomain(tenantDomain);
-            event.setUsername(username);
-            event.setTenantId(tenantId);
-            subscriptions.get(i).onLogin(configRegistry, event);
-        }
-    }
+//    public void triggerEvent(Registry configRegistry, String username, int tenantId, String tenantDomain) {
+//        for (int i = 0; i < subscriptions.size(); i ++) {
+//            LoginEvent event = new LoginEvent();
+//            event.setTenantDomain(tenantDomain);
+//            event.setUsername(username);
+//            event.setTenantId(tenantId);
+//            subscriptions.get(i).onLogin(configRegistry, event);
+//        }
+//    }
 }

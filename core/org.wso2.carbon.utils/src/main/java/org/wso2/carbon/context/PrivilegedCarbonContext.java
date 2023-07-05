@@ -25,7 +25,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.wso2.carbon.context.internal.CarbonContextDataHolder;
 import org.wso2.carbon.context.internal.OSGiDataHolder;
-import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserRealmService;
@@ -265,84 +264,49 @@ public class PrivilegedCarbonContext extends CarbonContext {
     }
 
     /**
-     * Method to set an instance of a registry on this CarbonContext instance.
-     *
-     * @param type     the type of registry to set.
-     * @param registry the registry instance.
-     */
-    public void setRegistry(RegistryType type, Registry registry) {
-        if (registry != null) {
-            CarbonContextDataHolder carbonContextDataHolder = getCarbonContextDataHolder();
-            switch (type) {
-                case USER_CONFIGURATION:
-                    log.trace("Setting config user registry instance.");
-                    carbonContextDataHolder.setConfigUserRegistry(registry);
-                    break;
-
-                case SYSTEM_CONFIGURATION:
-                    log.trace("Setting config system registry instance.");
-                    carbonContextDataHolder.setConfigSystemRegistry(registry);
-                    break;
-                case USER_GOVERNANCE:
-                    log.trace("Setting governance user registry instance.");
-                    carbonContextDataHolder.setGovernanceUserRegistry(registry);
-                    break;
-                case SYSTEM_GOVERNANCE:
-                    log.trace("Setting governance system registry instance.");
-                    carbonContextDataHolder.setGovernanceSystemRegistry(registry);
-                    break;
-                case LOCAL_REPOSITORY:
-                    log.trace("Setting local repository instance.");
-                    carbonContextDataHolder.setLocalRepository(registry);
-                    break;
-            }
-        }
-    }
-
-    /**
      * {@inheritDoc}
      */
-    public Registry getRegistry(RegistryType type) {
-        Registry registry = super.getRegistry(type);
-        if (registry != null) {
-            return registry;
-        }
-        switch (type) {
-            case SYSTEM_CONFIGURATION:
-                try {
-                    int tenantId = getTenantId();
-                    if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-                        registry =
-                                dataHolder.getRegistryService().getConfigSystemRegistry(tenantId);
-                        setRegistry(RegistryType.SYSTEM_CONFIGURATION, registry);
-                        return registry;
-                    }
-                } catch (Exception ignored) {
-                    // If we can't obtain an instance of the registry, we'll simply return null. The
-                    // errors that lead to this situation will be logged by the Registry Kernel.
-                }
-                return null;
-
-            case SYSTEM_GOVERNANCE:
-                try {
-                    int tenantId = getTenantId();
-                    if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-                        registry =
-                                dataHolder.getRegistryService().getGovernanceSystemRegistry(
-                                        tenantId);
-                        setRegistry(RegistryType.SYSTEM_GOVERNANCE, registry);
-                        return registry;
-                    }
-                } catch (Exception ignored) {
-                    // If we can't obtain an instance of the registry, we'll simply return null. The
-                    // errors that lead to this situation will be logged by the Registry Kernel.
-                }
-                return null;
-
-            default:
-                return null;
-        }
-    }
+//    public Registry getRegistry(RegistryType type) {
+//        Registry registry = super.getRegistry(type);
+//        if (registry != null) {
+//            return registry;
+//        }
+//        switch (type) {
+//            case SYSTEM_CONFIGURATION:
+//                try {
+//                    int tenantId = getTenantId();
+//                    if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+//                        registry =
+//                                dataHolder.getRegistryService().getConfigSystemRegistry(tenantId);
+//                        setRegistry(RegistryType.SYSTEM_CONFIGURATION, registry);
+//                        return registry;
+//                    }
+//                } catch (Exception ignored) {
+//                    // If we can't obtain an instance of the registry, we'll simply return null. The
+//                    // errors that lead to this situation will be logged by the Registry Kernel.
+//                }
+//                return null;
+//
+//            case SYSTEM_GOVERNANCE:
+//                try {
+//                    int tenantId = getTenantId();
+//                    if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+//                        registry =
+//                                dataHolder.getRegistryService().getGovernanceSystemRegistry(
+//                                        tenantId);
+//                        setRegistry(RegistryType.SYSTEM_GOVERNANCE, registry);
+//                        return registry;
+//                    }
+//                } catch (Exception ignored) {
+//                    // If we can't obtain an instance of the registry, we'll simply return null. The
+//                    // errors that lead to this situation will be logged by the Registry Kernel.
+//                }
+//                return null;
+//
+//            default:
+//                return null;
+//        }
+//    }
 
     public void setUserRealm(UserRealm userRealm) {
         getCarbonContextDataHolder().setUserRealm(userRealm);

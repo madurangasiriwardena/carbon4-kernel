@@ -28,7 +28,6 @@ import org.wso2.carbon.base.UnloadTenantTask;
 import org.wso2.carbon.queuing.CarbonQueue;
 import org.wso2.carbon.queuing.CarbonQueueManager;
 import org.wso2.carbon.queuing.QueuingException;
-import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserRealmService;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -94,35 +93,35 @@ import java.util.regex.Pattern;
 public final class CarbonContextDataHolder {
     private static final Log log = LogFactory.getLog(CarbonContextDataHolder.class);
 
-    /**
-     * The name of the property that stores a reference to the local repository instance of the
-     * current tenant.
-     */                                                                                                               
-    protected Registry localRepository;
-
-    /**
-     * The name of the property that stores a reference to the configuration registry instance of
-     * the current tenant, as visible to the system.
-     */
-    protected Registry configSystemRegistry;
-
-    /**
-     * The name of the property that stores a reference to the governance registry instance of the
-     * current tenant, as visible to the system.
-     */
-    protected Registry governanceSystemRegistry;
-
-    /**
-     * The name of the property that stores a reference to the configuration registry instance of
-     * the current tenant, as visible to a user.
-     */
-    protected Registry configUserRegistry;
-
-    /**
-     * The name of the property that stores a reference to the governance registry instance of the
-     * current tenant, as visible to a user.
-     */
-    protected Registry governanceUserRegistry;
+//    /**
+//     * The name of the property that stores a reference to the local repository instance of the
+//     * current tenant.
+//     */
+//    protected Registry localRepository;
+//
+//    /**
+//     * The name of the property that stores a reference to the configuration registry instance of
+//     * the current tenant, as visible to the system.
+//     */
+//    protected Registry configSystemRegistry;
+//
+//    /**
+//     * The name of the property that stores a reference to the governance registry instance of the
+//     * current tenant, as visible to the system.
+//     */
+//    protected Registry governanceSystemRegistry;
+//
+//    /**
+//     * The name of the property that stores a reference to the configuration registry instance of
+//     * the current tenant, as visible to a user.
+//     */
+//    protected Registry configUserRegistry;
+//
+//    /**
+//     * The name of the property that stores a reference to the governance registry instance of the
+//     * current tenant, as visible to a user.
+//     */
+//    protected Registry governanceUserRegistry;
 
     /**
      * The name of the property that stores a reference to the UserRealm instance of the current
@@ -231,45 +230,45 @@ public final class CarbonContextDataHolder {
         }
     }
 
-    public Registry getLocalRepository() {
-        return localRepository;
-    }
-
-    public void setLocalRepository(Registry localRepository) {
-        this.localRepository = localRepository;
-    }
-
-    public Registry getConfigSystemRegistry() {
-        return configSystemRegistry;
-    }
-
-    public void setConfigSystemRegistry(Registry configSystemRegistry) {
-        this.configSystemRegistry = configSystemRegistry;
-    }
-
-    public Registry getGovernanceSystemRegistry() {
-        return governanceSystemRegistry;
-    }
-
-    public void setGovernanceSystemRegistry(Registry governanceSystemRegistry) {
-        this.governanceSystemRegistry = governanceSystemRegistry;
-    }
-
-    public Registry getConfigUserRegistry() {
-        return configUserRegistry;
-    }
-
-    public void setConfigUserRegistry(Registry configUserRegistry) {
-        this.configUserRegistry = configUserRegistry;
-    }
-
-    public Registry getGovernanceUserRegistry() {
-        return governanceUserRegistry;
-    }
-
-    public void setGovernanceUserRegistry(Registry governanceUserRegistry) {
-        this.governanceUserRegistry = governanceUserRegistry;
-    }
+//    public Registry getLocalRepository() {
+//        return localRepository;
+//    }
+//
+//    public void setLocalRepository(Registry localRepository) {
+//        this.localRepository = localRepository;
+//    }
+//
+//    public Registry getConfigSystemRegistry() {
+//        return configSystemRegistry;
+//    }
+//
+//    public void setConfigSystemRegistry(Registry configSystemRegistry) {
+//        this.configSystemRegistry = configSystemRegistry;
+//    }
+//
+//    public Registry getGovernanceSystemRegistry() {
+//        return governanceSystemRegistry;
+//    }
+//
+//    public void setGovernanceSystemRegistry(Registry governanceSystemRegistry) {
+//        this.governanceSystemRegistry = governanceSystemRegistry;
+//    }
+//
+//    public Registry getConfigUserRegistry() {
+//        return configUserRegistry;
+//    }
+//
+//    public void setConfigUserRegistry(Registry configUserRegistry) {
+//        this.configUserRegistry = configUserRegistry;
+//    }
+//
+//    public Registry getGovernanceUserRegistry() {
+//        return governanceUserRegistry;
+//    }
+//
+//    public void setGovernanceUserRegistry(Registry governanceUserRegistry) {
+//        this.governanceUserRegistry = governanceUserRegistry;
+//    }
 
     public UserRealm getUserRealm() {
         if(userRealm == null){
