@@ -2,6 +2,7 @@
 # Uses:
 #   OS: ubuntu-latest
 #   JDK: Adopt JDK 21
+#   Maven: 3.9.16
 
 name: PR Builder
 
@@ -29,6 +30,11 @@ jobs:
         with:
           java-version: "21"
           distribution: "adopt"
+      # carbon-p2-plugin (Tycho) fails to load in Maven 3.10.x, which ubuntu-latest ships since 20261004.
+      - name: Set up Maven 3.9.16
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.16
       - name: Cache local Maven repository
         id: cache-maven-m2
         uses: actions/cache@v3
